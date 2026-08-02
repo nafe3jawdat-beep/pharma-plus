@@ -277,7 +277,7 @@ export default function Register() {
               <>
                 <div className="flex gap-4">
                   <InputField id="f_name" label={t("auth.firstName")} value={formData.f_name} onChange={handleChange} error={errors.f_name} placeholder={t("placeholders.nameExample")} containerClass="flex-1" />
-                  <InputField id="l_name" label={t("auth.lastName")} value={formData.l_name} onChange={handleChange} error={errors.l_name} placeholder="Doe" containerClass="flex-1" />
+                  <InputField id="l_name" label={t("auth.lastName")} value={formData.l_name} onChange={handleChange} error={errors.l_name} placeholder="محمد" containerClass="flex-1" />
                 </div>
 
                 <InputField id="email" label={t("auth.email")} type="email" value={formData.email} onChange={handleChange} error={errors.email} placeholder={t("placeholders.email")} />

@@ -172,11 +172,11 @@ export default function EmployeesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("auth.firstName")}</label>
-                <input type="text" name="f_name" value={formData.f_name} onChange={handleInputChange} className={inputClass} placeholder="John" />
+                <input type="text" name="f_name" value={formData.f_name} onChange={handleInputChange} className={inputClass} placeholder="أحمد" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("auth.lastName")}</label>
-                <input type="text" name="l_name" value={formData.l_name} onChange={handleInputChange} className={inputClass} placeholder="Doe" />
+                <input type="text" name="l_name" value={formData.l_name} onChange={handleInputChange} className={inputClass} placeholder="محمد" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("employees.email")}</label>
