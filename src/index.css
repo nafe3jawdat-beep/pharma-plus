@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant rtl (&:where([dir="rtl"], [dir="rtl"] *));
+
+@theme {
+  --color-primary: #0b6a6a;
+  --color-primary-dim: #005d5d;
+  --color-primary-container: #a2f0f0;
+  --color-on-primary: #e0fffe;
+
+  --color-surface: #f8fafb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f4f6;
+  --color-surface-container: #eaeff0;
+  --color-surface-container-high: #e3e9eb;
+
+  --color-on-surface: #2c3436;
+  --color-on-surface-variant: #596063;
+  --color-outline-variant: #acb3b6;
+
+  --color-secondary-container: #cce8e8;
+  --color-on-secondary-container: #3d5656;
+}
+
+@layer utilities {
+  .bg-surface { background-color: var(--color-surface); }
+  .bg-surface-container { background-color: var(--color-surface-container); }
+  .bg-surface-container-low { background-color: var(--color-surface-container-low); }
+  .bg-surface-container-lowest { background-color: var(--color-surface-container-lowest); }
+  .bg-surface-container-high { background-color: var(--color-surface-container-high); }
+
+  .bg-primary { background-color: var(--color-primary); }
+  .bg-primary-container { background-color: var(--color-primary-container); }
+  .bg-primary-dim { background-color: var(--color-primary-dim); }
+  .text-primary { color: var(--color-primary); }
+  .text-primary-dim { color: var(--color-primary-dim); }
+
+  .text-on-surface { color: var(--color-on-surface); }
+  .text-on-surface-variant { color: var(--color-on-surface-variant); }
+  .text-on-primary { color: var(--color-on-primary); }
+
+  .text-outline { color: var(--color-outline-variant); }
+  .border-outline-variant { border-color: var(--color-outline-variant); }
+
+  .bg-secondary-container { background-color: var(--color-secondary-container); }
+  .text-on-secondary-container { color: var(--color-on-secondary-container); }
+
+  .shadow-ambient { box-shadow: 0px 30px 60px -15px rgba(11, 106, 106, 0.06); }
+  .shadow-ambient-sm { box-shadow: 0px 10px 30px -5px rgba(11, 106, 106, 0.04); }
+
+  .dark .shadow-ambient { box-shadow: 0px 30px 60px -15px rgba(0, 0, 0, 0.4); }
+  .dark .shadow-ambient-sm { box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.3); }
+
+}
+
+.dark {
+  --color-primary: #6bdbdb;
+  --color-primary-dim: #4fbdbd;
+  --color-primary-container: #004d4d;
+  --color-on-primary: #003737;
+
+  --color-surface: #141b1e;
+  --color-surface-container-lowest: #090f12;
+  --color-surface-container-low: #0e1517;
+  --color-surface-container: #1a2124;
+  --color-surface-container-high: #242b2e;
+
+  --color-on-surface: #dee3e4;
+  --color-on-surface-variant: #bec3c6;
+  --color-outline-variant: #6b7477;
+
+  --color-secondary-container: #141b1e;
+  --color-on-secondary-container: #b1d4d4;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  
+  /* تطبيق متغير الخلفية الذي سيتغير تلقائياً حسب الوضع */
+  background-color: var(--color-surface); 
+  
+  /* تطبيق متغير لون النص ليتناسب مع الخلفية بشكل تلقائي */
+  color: var(--color-on-surface); 
+  
+  /* إضافة تأثير انتقال سلس (Smooth Transition) ليكون التبديل بين الوضعين مريحاً للعين */
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
