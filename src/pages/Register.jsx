@@ -222,14 +222,6 @@ export default function Register() {
               </div>
             )}
           </div>
-
-          <div className="mt-12 flex justify-start relative">
-            <img
-              src="/images/register.png"
-              alt="Pharma Plus"
-              className="w-full rounded-2xl object-cover"
-            />
-          </div>
         </div>
 
         <div className="w-full lg:w-7/12 p-12 lg:p-16 bg-surface-container-lowest">
