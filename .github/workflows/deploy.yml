@@ -1,36 +1,21 @@
-name: Build & Deploy React Frontend
+name: Deploy React Frontend via SSH
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        # تم إزالة سطر الـ cache هنا لتنظيف الذاكرة المؤقتة تماماً
-
-    - name: Install dependencies & Build
-      run: |
-        rm -f package-lock.json
-        npm install --no-audit --no-fund
-        npm run build
-
-    - name: Deploy build to Server via SCP
-      uses: appleboy/scp-action@v0.1.7
+    - name: Execute Remote SSH Commands to Pull and Build
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "dist/*"
-        target: "/var/www/react-web/"
-        strip_components: 1
-        overwrite: true
+        script: |
+          cd /var/www/react-web
+          git checkout main
+          git pull origin main
+          npm run build
