@@ -16,12 +16,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
-        cache: 'npm'
+        # تم إزالة سطر الـ cache هنا لتنظيف الذاكرة المؤقتة تماماً
 
     - name: Install dependencies & Build
       run: |
         rm -f package-lock.json
-        npm install
+        npm install --no-audit --no-fund
         npm run build
 
     - name: Deploy build to Server via SCP
