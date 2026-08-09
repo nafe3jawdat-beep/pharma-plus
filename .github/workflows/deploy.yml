@@ -21,11 +21,8 @@ jobs:
           git pull origin main
           git stash pop || true
           
-          # جلب المسار الصحيح لنسخة Node 22 يدوياً وتشغيل البناء بها
-          export PATH="/usr/local/bin:/usr/bin:$PATH"
-          . ~/.nvm/nvm.sh && nvm use 22 || true
+          # جلب المسار الصحيح لنسخة Node 22 وتعديل PATH
+          export PATH="/root/.nvm/versions/node/v22.23.2/bin:$PATH"
           
-          node -v # هذا السطر فقط للتأكد في السجلات من الإصدار الحالي
-            /root/.nvm/versions/node/v22.23.2/bin/npm run build
-          "
-
+          node -v
+          npm run build
