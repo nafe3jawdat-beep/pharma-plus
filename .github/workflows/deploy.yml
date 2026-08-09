@@ -15,7 +15,12 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          cd /var/www/react-web
-          git checkout main
-          git pull origin main
-          npm run build
+          bash -l -c "
+            cd /var/www/react-web
+            git checkout main
+            git stash
+            git pull origin main
+            git stash pop || true
+            npm run build
+          "
+
