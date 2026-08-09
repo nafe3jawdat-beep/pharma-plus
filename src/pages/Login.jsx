@@ -136,7 +136,7 @@ const Login = () => {
           <div className="relative bg-surface-container-lowest rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-surface-container-high">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-primary text-xl">admin_panel_settings</span>
+                <span className="material-symbols-outlined text-primary text-xl">admin_panel_settings login</span>
               </div>
               <h3 className="text-base font-extrabold text-on-surface">{t("auth.adminAccess")}</h3>
             </div>
