@@ -15,12 +15,17 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          bash -l -c "
-            cd /var/www/react-web
-            git checkout main
-            git stash
-            git pull origin main
-            git stash pop || true
+          cd /var/www/react-web
+          git checkout main
+          git stash
+          git pull origin main
+          git stash pop || true
+          
+          # جلب المسار الصحيح لنسخة Node 22 يدوياً وتشغيل البناء بها
+          export PATH="/usr/local/bin:/usr/bin:$PATH"
+          . ~/.nvm/nvm.sh && nvm use 22 || true
+          
+          node -v # هذا السطر فقط للتأكد في السجلات من الإصدار الحالي
             /root/.nvm/versions/node/v22.23.2/bin/npm run build
           "
 
