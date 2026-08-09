@@ -14,7 +14,11 @@ export async function api(method, path, opts = {}) {
   }
 
   const headers = { "Accept": "application/json" };
-  const token = localStorage.getItem("token");
+  let token = localStorage.getItem("token");
+  if (token && /mock/i.test(token)) {
+    localStorage.removeItem("token");
+    token = null;
+  }
   if (token) headers.Authorization = "Bearer " + token;
 
   const isFormData = body instanceof FormData;
@@ -22,18 +26,25 @@ export async function api(method, path, opts = {}) {
 
   const payload = body ? (isFormData ? body : JSON.stringify(body)) : undefined;
 
+  console.log(`[API] ${method} ${url}`, { params, headers, body: isFormData ? '(FormData)' : body });
+
   let res;
   try {
     res = await fetch(url, { method, headers, body: payload, signal });
   } catch (err) {
-    if (err?.name !== 'AbortError') reportApiResult(false);
+    if (err?.name !== 'AbortError') {
+      reportApiResult(false);
+      console.error(`[API] ${method} ${url} failed`, { status: err?.response?.status ?? 'N/A', error: err });
+    }
     throw err;
   }
   reportApiResult(true);
   const data = await res.json();
+  console.log(`[API] ${method} ${url} → ${res.status}`, data);
   if (!res.ok) {
     const err = new Error(data?.message || "Request failed");
     err.response = { data, status: res.status };
+    console.error(`[API] ${method} ${url} error`, { status: res.status, data });
     throw err;
   }
   return data;

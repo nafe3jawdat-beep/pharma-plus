@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useEcho } from "../contexts/EchoContext";
 import { cacheInventory } from "../services/pharmacist";
 import { api } from "../services/api";
+import { playOrderSound } from "../utils/sound";
 
 export default function PharmacistLayout() {
   const { t } = useTranslation();
@@ -25,6 +26,42 @@ export default function PharmacistLayout() {
   const [orderVersion, setOrderVersion] = useState(0);
 
   const isVerified = verificationStatus === "approved";
+
+  const notifyOrder = (type, title, subtitle) => {
+    const isRequests = type === "requests";
+    const path = "/Dashboard/Requests";
+    const icon = isRequests ? "orders" : "receipt_long";
+    const iconTint = isRequests ? "bg-primary-container/40 text-primary" : "bg-amber-100 text-amber-600";
+    const strip = isRequests ? "from-primary to-primary/20" : "from-amber-400 to-amber-200";
+
+    toast.custom(
+      (t) => (
+        <button
+          onClick={() => {
+            navigate(path);
+            toast.dismiss(t.id);
+          }}
+          className="group relative overflow-hidden flex items-center gap-3.5 bg-surface-container-lowest border border-surface-container-high rounded-2xl shadow-lg pl-5 pr-4 py-3.5 cursor-pointer text-left w-[340px] max-w-[calc(100vw-2rem)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:border-primary/40"
+        >
+          <span className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${strip}`} />
+          <span className={`relative w-11 h-11 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 ${iconTint}`}>
+            <span className="material-symbols-outlined text-xl">{icon}</span>
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-surface-container-lowest">
+              <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping" />
+            </span>
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-bold text-on-surface leading-tight">{title}</span>
+            <span className="block text-xs text-on-surface-variant/70 mt-0.5">{subtitle}</span>
+          </span>
+          <span className="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors group-hover:bg-primary group-hover:text-on-primary">
+            <span className="material-symbols-outlined text-base">arrow_forward</span>
+          </span>
+        </button>
+      ),
+      { duration: 10000 }
+    );
+  };
 
   const refreshPharmacies = () => {
     authApi
@@ -94,15 +131,23 @@ export default function PharmacistLayout() {
 
     const channelName = `pharmacy.${pharmacyId}`;
     const channel = echo.private(channelName);
-    channel.listen(".medication.hold.requested", () => {
-      toast.success(t("orders.newOrder", "New Order"), {
-        onClick: () => navigate("/Dashboard/Requests"),
+    console.log(`[WS] subscribing to ${channelName}`);
+    channel.error((e) => console.error(`[WS] subscription error ${channelName}`, e));
+    if (channel.subscription) {
+      channel.subscription.bind("pusher:subscription_succeeded", () => {
+        console.log(`[WS] subscribed ${channelName}`);
       });
+    }
+    channel.listen(".medication.hold.requested", (event) => {
+      console.log("[WS] medication.hold.requested", event);
+      playOrderSound();
+      notifyOrder("requests", t("orders.newOrder", "New Order"), t("orders.clickToViewRequests", "Click to view requests"));
+      setOrderVersion((v) => v + 1);
     });
-    channel.listen(".order.created", () => {
-      toast.success(t("orders.newOrderReceived", "New Order Received"), {
-        onClick: () => navigate("/Dashboard/Orders"),
-      });
+    channel.listen(".order.created", (event) => {
+      console.log("[WS] order.created", event);
+      playOrderSound();
+      notifyOrder("created", t("orders.newOrderReceived", "New Order Received"), t("orders.clickToViewOrders", "Click to view orders"));
       setOrderVersion((v) => v + 1);
     });
 

@@ -84,9 +84,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://26.41.27.248:8000',
+        target: 'http://10.169.55.133:8000',
         changeOrigin: true,
-      }
+      },
+      '/broadcasting': {
+        target: 'http://10.169.55.133:8000',
+        changeOrigin: true,
+      },
     }
   },
 })

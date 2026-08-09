@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
+import { isOrderSoundEnabled, setOrderSoundEnabled } from "../utils/sound";
 
 export default function Sidebar({ pharmacies, selectedPharmacy, setSelectedPharmacy, isVerified,  sidebarOpen, setSidebarOpen, myPermissions, isOwner }) {
   const { t } = useTranslation();
@@ -9,6 +10,7 @@ export default function Sidebar({ pharmacies, selectedPharmacy, setSelectedPharm
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(() => isOrderSoundEnabled());
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -190,6 +192,13 @@ export default function Sidebar({ pharmacies, selectedPharmacy, setSelectedPharm
         </NavLink>
         </>
       )}
+        <button
+          onClick={() => { const next = !soundOn; setSoundOn(next); setOrderSoundEnabled(next); }}
+          className="flex items-center gap-3 w-full px-4 py-3 text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-xl transition-all font-medium"
+        >
+          <span className="material-symbols-outlined">{soundOn ? "volume_up" : "volume_off"}</span>
+          {soundOn ? t("nav.soundOn", "Order sound: On") : t("nav.soundOff", "Order sound: Off")}
+        </button>
         <NavLink to="/Dashboard/Settings" className={({ isActive }) =>
           `flex items-center gap-3 w-full px-4 py-3 text-sm rounded-xl transition-all font-medium ${
             isActive

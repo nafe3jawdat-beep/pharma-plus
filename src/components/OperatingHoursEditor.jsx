@@ -82,8 +82,8 @@ export default function OperatingHoursEditor({ pharmacyId, initialHours, onSaved
     try {
       const { operatingHourService } = await import("../services/pharmacist");
       await operatingHourService.declareVacation(pharmacyId, {
-        from_day: vacationFrom,
-        to_day: vacationTo,
+        start_day: vacationFrom,
+        end_day: vacationTo,
       });
       onSaved?.();
     } catch (err) {

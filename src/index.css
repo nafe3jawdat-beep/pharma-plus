@@ -102,3 +102,21 @@ body {
   from { opacity: 0; transform: translateY(12px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+@keyframes order-bounce {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-8px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-order-bounce {
+  animation: order-bounce 0.7s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-order-bounce {
+    animation: none;
+  }
+}

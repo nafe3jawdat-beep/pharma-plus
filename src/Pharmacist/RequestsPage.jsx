@@ -46,7 +46,7 @@ function SkeletonRow() {
 }
 
 export default function RequestsPage() {
-  const { selectedPharmacy } = useOutletContext();
+  const { selectedPharmacy, orderVersion } = useOutletContext();
   const { t } = useTranslation();
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +68,7 @@ export default function RequestsPage() {
       .then((data) => setPrescriptions(data?.data ?? []))
       .catch(() => { setPrescriptions([]); setError(true); })
       .finally(() => setLoading(false));
-  }, [selectedPharmacy?.id]);
+  }, [selectedPharmacy?.id, orderVersion]);
 
   const stats = useMemo(() => {
     const total = prescriptions.length;
