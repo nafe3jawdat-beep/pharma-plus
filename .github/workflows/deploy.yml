@@ -2,31 +2,28 @@ name: Build & Deploy React Frontend
 
 on:
   push:
-    branches: [ main ] # أو master حسب اسم الفرع الرئيسي
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. جلب الكود من GitHub
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # 2. إعداد بيئة Node.js
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
         cache: 'npm'
 
-    # 3. تثبيت المكتبات وتوليد ملفات الـ dist
     - name: Install dependencies & Build
       run: |
-        npm ci
+        rm -f package-lock.json
+        npm install
         npm run build
 
-    # 4. نقل ملفات الـ dist إلى مجلد /var/www/react-web/ مباشرة
     - name: Deploy build to Server via SCP
       uses: appleboy/scp-action@v0.1.7
       with:
