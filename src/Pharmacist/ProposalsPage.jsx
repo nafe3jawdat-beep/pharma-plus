@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { proposalsApi } from "../services/pharmacist";
+import { proposalsApi, pharmacyMedicationApi } from "../services/pharmacist";
 
 const STATUS_BADGE = {
   pending: "bg-blue-100 text-blue-700",
@@ -37,15 +38,41 @@ function SkeletonRow() {
   );
 }
 
+function normalizeItem(item) {
+  return {
+    ...item,
+    name: item.medication_name ?? item.trade_name ?? "—",
+    image: item.image_url ?? item.image ?? null,
+  };
+}
+
+const EMPTY_PROMPTS = {
+  quick: {
+    icon: "bolt",
+    titleKey: "proposals.quickAddEmptyTitle",
+    hintKey: "proposals.quickAddEmptyHint",
+  },
+  slow: {
+    icon: "rate_review",
+    titleKey: "proposals.emptyTitle",
+    hintKey: "proposals.emptyHint",
+  },
+};
+
 export default function ProposalsPage() {
   const { t } = useTranslation();
+  const { selectedPharmacy } = useOutletContext();
+  const [activeSection, setActiveSection] = useState("quick");
+
   const [proposals, setProposals] = useState([]);
+  const [quickAdds, setQuickAdds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setLoading(true);
     setError(false);
     proposalsApi
@@ -53,31 +80,64 @@ export default function ProposalsPage() {
       .then((data) => setProposals(data?.data ?? []))
       .catch(() => { setProposals([]); setError(true); })
       .finally(() => setLoading(false));
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (activeSection !== "quick") return;
+    if (!selectedPharmacy?.id) {
+      setQuickAdds([]);
+      setLoading(false);
+      setError(false);
+      return;
+    }
+    setLoading(true);
+    setError(false);
+    pharmacyMedicationApi
+      .list(selectedPharmacy.id)
+      .then((data) => setQuickAdds(data?.data ?? []))
+      .catch(() => { setQuickAdds([]); setError(true); })
+      .finally(() => setLoading(false));
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [activeSection, selectedPharmacy?.id]);
+
+  const sourceItems = activeSection === "quick" ? quickAdds : proposals;
+  const items = useMemo(() => sourceItems.map(normalizeItem), [sourceItems]);
+
   const stats = useMemo(() => {
-    const total = proposals.length;
-    const pending = proposals.filter((p) => p.status === "pending").length;
-    const approved = proposals.filter((p) => p.status === "approved").length;
-    const rejected = proposals.filter((p) => p.status === "rejected").length;
+    const total = items.length;
+    const pending = items.filter((p) => p.status === "pending").length;
+    const approved = items.filter((p) => p.status === "approved").length;
+    const rejected = items.filter((p) => p.status === "rejected").length;
     return { total, pending, approved, rejected };
-  }, [proposals]);
+  }, [items]);
 
   const filtered = useMemo(() => {
-    if (!statusFilter) return proposals;
-    return proposals.filter((p) => p.status === statusFilter);
-  }, [proposals, statusFilter]);
+    if (!statusFilter) return items;
+    return items.filter((p) => p.status === statusFilter);
+  }, [items, statusFilter]);
 
   const filterTabs = useMemo(() => {
     const counts = {};
-    proposals.forEach((p) => { counts[p.status] = (counts[p.status] || 0) + 1; });
+    items.forEach((p) => { counts[p.status] = (counts[p.status] || 0) + 1; });
     return [
-      { value: "", labelKey: "orders.all", label: "All", count: proposals.length },
+      { value: "", labelKey: "orders.all", label: "All", count: items.length },
       { value: "pending", labelKey: "proposals.status.pending", label: "Pending", count: counts.pending || 0 },
       { value: "approved", labelKey: "proposals.status.approved", label: "Approved", count: counts.approved || 0 },
       { value: "rejected", labelKey: "proposals.status.rejected", label: "Rejected", count: counts.rejected || 0 },
     ];
-  }, [proposals]);
+  }, [items]);
+
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    setStatusFilter("");
+    setExpandedId(null);
+    setError(false);
+  };
+
+  const noPharmacy = activeSection === "quick" && !selectedPharmacy?.id;
+  const emptyPrompt = EMPTY_PROMPTS[activeSection];
 
   return (
     <div className="h-full overflow-y-auto bg-surface px-4 py-8 lg:px-12 font-sans text-on-surface antialiased">
@@ -87,7 +147,34 @@ export default function ProposalsPage() {
           <p className="text-base text-on-surface-variant">{t("proposals.description")}</p>
         </div>
 
-        {!loading && proposals.length > 0 && (
+        <div className="flex bg-surface-container-high rounded-xl p-1 max-w-md">
+          <button
+            type="button"
+            onClick={() => handleSectionChange("quick")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              activeSection === "quick"
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">bolt</span>
+            {t("proposals.quickAddTab")}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSectionChange("slow")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              activeSection === "slow"
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface"
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">how_to_reg</span>
+            {t("proposals.slowAddTab")}
+          </button>
+        </div>
+
+        {!loading && !noPharmacy && items.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon="inbox" label={t("proposals.total")} count={stats.total} color="text-primary" bg="bg-primary-container/30" />
             <StatCard icon="schedule" label={t("proposals.status.pending")} count={stats.pending} color="text-blue-700" bg="bg-blue-100" />
@@ -96,7 +183,7 @@ export default function ProposalsPage() {
           </div>
         )}
 
-        {!loading && proposals.length > 0 && (
+        {!loading && !noPharmacy && items.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {filterTabs.map((tab) => (
               <button
@@ -126,6 +213,16 @@ export default function ProposalsPage() {
               <SkeletonRow />
               <SkeletonRow />
             </div>
+          ) : noPharmacy ? (
+            <div className="flex flex-col items-center justify-center py-16 px-8">
+              <div className="w-20 h-20 rounded-full bg-primary-container/20 flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-4xl text-primary/60" style={{ fontVariationSettings: "'wght' 300" }}>storefront</span>
+              </div>
+              <h3 className="text-xl font-bold text-on-surface mb-2">{t("proposals.noPharmacyTitle")}</h3>
+              <p className="text-on-surface-variant/70 text-sm max-w-md text-center">
+                {t("errors.noPharmacySelected")}
+              </p>
+            </div>
           ) : error ? (
             <div className="p-8 text-center">
               <span className="material-symbols-outlined text-4xl text-rose-500 mb-3">error</span>
@@ -137,14 +234,14 @@ export default function ProposalsPage() {
                 {t("app.tryAgain")}
               </button>
             </div>
-          ) : proposals.length === 0 ? (
+          ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-8">
               <div className="w-20 h-20 rounded-full bg-primary-container/20 flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-4xl text-primary/60" style={{ fontVariationSettings: "'wght' 300" }}>rate_review</span>
+                <span className="material-symbols-outlined text-4xl text-primary/60" style={{ fontVariationSettings: "'wght' 300" }}>{emptyPrompt.icon}</span>
               </div>
-              <h3 className="text-xl font-bold text-on-surface mb-2">{t("proposals.emptyTitle")}</h3>
+              <h3 className="text-xl font-bold text-on-surface mb-2">{t(emptyPrompt.titleKey)}</h3>
               <p className="text-on-surface-variant/70 text-sm max-w-md text-center">
-                {t("proposals.emptyHint")}
+                {t(emptyPrompt.hintKey)}
               </p>
             </div>
           ) : filtered.length === 0 ? (
@@ -167,7 +264,7 @@ export default function ProposalsPage() {
                           <span className="material-symbols-outlined text-xl">medication</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-on-surface truncate">{proposal.medication_name || "—"}</p>
+                          <p className="font-bold text-on-surface truncate">{proposal.name}</p>
                           <div className="flex items-center gap-3 mt-0.5">
                             {proposal.form && (
                               <span className="text-sm text-on-surface-variant">{proposal.form}</span>
@@ -202,16 +299,16 @@ export default function ProposalsPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-0.5">{t("proposals.medicationName")}</p>
-                            <p className="text-sm text-on-surface">{proposal.medication_name || "—"}</p>
+                            <p className="text-sm text-on-surface">{proposal.name}</p>
                           </div>
                           <div>
                             <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-0.5">{t("drugs.dosageForm")}</p>
                             <p className="text-sm text-on-surface">{proposal.form || "—"}</p>
                           </div>
-                          {proposal.image_url && (
+                          {proposal.image && (
                             <div className="sm:col-span-2">
                               <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/60 font-bold mb-1">{t("proposals.image")}</p>
-                              <img src={proposal.image_url} alt={proposal.medication_name} className="h-24 rounded-lg object-cover border border-surface-container-high" />
+                              <img src={proposal.image} alt={proposal.name} className="h-24 rounded-lg object-cover border border-surface-container-high" />
                             </div>
                           )}
                           {proposal.status === "rejected" && proposal.rejection_reason && (

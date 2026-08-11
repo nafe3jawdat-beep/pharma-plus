@@ -1019,6 +1019,11 @@
     "medicationName": "Medication Name",
     "image": "Image",
     "rejectionReason": "Rejection Reason",
+    "quickAddTab": "Quick Add",
+    "slowAddTab": "Slow Add",
+    "noPharmacyTitle": "Select a pharmacy",
+    "quickAddEmptyTitle": "No quick-added medications yet",
+    "quickAddEmptyHint": "Medications you add directly to your pharmacy inventory via Quick Add will appear here.",
     "status": {
       "pending": "Pending",
       "approved": "Approved",

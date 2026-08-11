@@ -1004,6 +1004,11 @@
     "medicationName": "اسم الدواء",
     "image": "الصورة",
     "rejectionReason": "سبب الرفض",
+    "quickAddTab": "إضافة سريعة",
+    "slowAddTab": "إضافة بطيئة",
+    "noPharmacyTitle": "اختر صيدلية",
+    "quickAddEmptyTitle": "لا توجد أدوية مضافة سريعاً بعد",
+    "quickAddEmptyHint": "ستظهر هنا الأدوية التي تضيفها مباشرة إلى مخزون صيدليتك عبر الإضافة السريعة.",
     "status": {
       "pending": "قيد الانتظار",
       "approved": "مقبول",
