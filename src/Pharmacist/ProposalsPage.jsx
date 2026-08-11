@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { proposalsApi, pharmacyMedicationApi } from "../services/pharmacist";
+import toast from "react-hot-toast";
+import { proposalsApi, pharmacyMedicationApi, stockApi } from "../services/pharmacist";
 
 const STATUS_BADGE = {
   pending: "bg-blue-100 text-blue-700",
@@ -70,6 +71,7 @@ export default function ProposalsPage() {
   const [error, setError] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [expandedId, setExpandedId] = useState(null);
+  const [addingItemId, setAddingItemId] = useState(null);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
@@ -134,6 +136,43 @@ export default function ProposalsPage() {
     setStatusFilter("");
     setExpandedId(null);
     setError(false);
+  };
+
+  const resolveMedicationId = async (item) => {
+    if (activeSection === "quick") return item.id;
+    const res = await pharmacyMedicationApi.list(selectedPharmacy.id);
+    const list = res?.data ?? [];
+    const match = list.find((m) =>
+      m.trade_name?.trim().toLowerCase() === item.medication_name?.trim().toLowerCase()
+    );
+    return match?.id ?? null;
+  };
+
+  const handleAddToInventory = async (item) => {
+    if (!selectedPharmacy?.id) { toast.error(t("errors.noPharmacySelected")); return; }
+    setAddingItemId(item.id);
+    try {
+      const medicationId = await resolveMedicationId(item);
+      if (!medicationId) {
+        toast.error(t("proposals.medicationNotFoundInPharmacy"));
+        return;
+      }
+      const res = await stockApi.addItem(selectedPharmacy.id, {
+        medication_id: medicationId,
+        price: 0,
+        stock: 1,
+        min_stock: 10,
+      });
+      if (res?.skipped?.length > 0) {
+        toast.error(res.skipped[0].message || t("errors.addFailed", { name: item.name }));
+      } else {
+        toast.success(t("success.added", { name: item.name }));
+      }
+    } catch {
+      toast.error(t("errors.addFailed", { name: item.name }));
+    } finally {
+      setAddingItemId(null);
+    }
   };
 
   const noPharmacy = activeSection === "quick" && !selectedPharmacy?.id;
@@ -283,6 +322,20 @@ export default function ProposalsPage() {
                     </div>
 
                     <div className="flex items-center gap-2 ml-[52px] flex-wrap">
+                      {(activeSection === "quick" || proposal.status === "accepted") && (
+                        <button
+                          onClick={() => handleAddToInventory(proposal)}
+                          disabled={addingItemId === proposal.id}
+                          className="inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 transition-all whitespace-nowrap disabled:opacity-50"
+                        >
+                          {addingItemId === proposal.id ? (
+                            <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                          ) : (
+                            <span className="material-symbols-outlined text-sm">add</span>
+                          )}
+                          {addingItemId === proposal.id ? t("app.adding") : t("stock.addToInventory")}
+                        </button>
+                      )}
                       <button
                         onClick={() => setExpandedId(prev => prev === proposal.id ? null : proposal.id)}
                         className="inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-container text-xs font-bold text-on-surface-variant transition-all whitespace-nowrap"

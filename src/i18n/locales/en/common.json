@@ -1024,6 +1024,7 @@
     "noPharmacyTitle": "Select a pharmacy",
     "quickAddEmptyTitle": "No quick-added medications yet",
     "quickAddEmptyHint": "Medications you add directly to your pharmacy inventory via Quick Add will appear here.",
+    "medicationNotFoundInPharmacy": "This medication isn't in your pharmacy list yet. Add it via Quick Add first.",
     "status": {
       "pending": "Pending",
       "approved": "Approved",
