@@ -552,6 +552,8 @@
     "expense_insurance": "التأمين",
     "expense_marketing": "التسويق",
     "expense_miscellaneous": "متفرقات",
+    "expense_maintenance": "الصيانة",
+    "expense_other": "أخرى",
     "loss_damages": "التلفيات",
     "loss_expenses": "المصروفات",
     "loss_salaries": "الرواتب",

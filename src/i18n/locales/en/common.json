@@ -566,6 +566,8 @@
     "expense_insurance": "Insurance",
     "expense_marketing": "Marketing",
     "expense_miscellaneous": "Miscellaneous",
+    "expense_maintenance": "Maintenance",
+    "expense_other": "Other",
     "loss_damages": "Damages",
     "loss_expenses": "Expenses",
     "loss_salaries": "Salaries",
