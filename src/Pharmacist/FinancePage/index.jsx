@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import {
@@ -10,7 +10,8 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { reportsApi } from "../../services/pharmacist";
+import { reportsApi, employeeService } from "../../services/pharmacist";
+import { useAuth } from "../../contexts/AuthContext";
 
 const toDateStr = (d) => {
   const y = d.getFullYear();
@@ -390,7 +391,8 @@ const rankBadge = (rank) => (
 
 export default function FinancePage() {
   const { t } = useTranslation();
-  const { selectedPharmacy } = useOutletContext();
+  const { user } = useAuth();
+  const { selectedPharmacy, isOwner } = useOutletContext();
   const pharmacyId = selectedPharmacy?.id;
 
   const today = new Date();
@@ -416,6 +418,7 @@ export default function FinancePage() {
   const [topMedsError, setTopMedsError] = useState(false);
 
   const [ai, setAi] = useState({ status: "idle", data: null, loading: false });
+  const [staffSearch, setStaffSearch] = useState("");
 
   const fetchAll = useCallback(async () => {
     if (!pharmacyId) return;
@@ -426,6 +429,7 @@ export default function FinancePage() {
       ["expiring", reportsApi.expiringInventory(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date, days: filters.days })],
       ["slowMoving", reportsApi.slowMoving(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date })],
       ["staff", reportsApi.staffPerformance(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date })],
+      ["employees", employeeService.getAll(pharmacyId)],
     ];
     const results = await Promise.allSettled(requests.map(([, p]) => p));
     const nextData = {};
@@ -528,8 +532,10 @@ export default function FinancePage() {
   const expiringError = errors.expiring;
   const slowMoving = data.slowMoving ?? [];
   const slowMovingError = errors.slowMoving;
-  const staff = data.staff ?? [];
+  const staff = useMemo(() => data.staff ?? [], [data.staff]);
   const staffError = errors.staff;
+  const employees = data.employees ?? null;
+  const employeesError = errors.employees;
 
   const breakdownData = Array.isArray(summary?.expense_breakdown)
     ? summary.expense_breakdown.map((e) => ({
@@ -648,17 +654,65 @@ export default function FinancePage() {
     ],
   }));
 
-  const staffRows = staff.map((p, i) => ({
-    key: `${p.pharmacist_id}-${i}`,
-    cells: [
-      { content: <span className="font-bold text-on-surface">{p.name ?? p.pharmacist_name}</span> },
-      { content: <span className="tabular-nums">{Number(p.total_orders ?? p.total_orders_handled).toLocaleString()}</span>, align: "end" },
-      { content: <span className="tabular-nums">{fmtMoney(p.total_sales_volume)}</span>, align: "end" },
-      { content: <span className="tabular-nums">{fmtMoney(p.avg_order_value ?? p.average_order_value)}</span>, align: "end" },
-      { content: <span className="tabular-nums">{Number(p.total_returns ?? p.returns_count).toLocaleString()}</span>, align: "end" },
-      { content: <span className="font-bold tabular-nums text-on-surface">{fmtPct(p.return_rate)}</span>, align: "end" },
-    ],
-  }));
+  const mergedEmployees = useMemo(() => {
+    const byId = new Map(staff.map((p) => [p.pharmacist_id, p]));
+    const byName = new Map(staff.map((p) => [(p.name ?? p.pharmacist_name ?? "").toLowerCase(), p]));
+    const base = Array.isArray(employees) ? employees : staff.length > 0 ? staff : [];
+    const list = base.map((emp) => {
+      const perf = byId.get(emp.user_id) || byName.get(String(emp.name ?? "").toLowerCase()) || {};
+      return { ...emp, ...perf, role: emp.role || "staff" };
+    });
+    const hasOwner = list.some((e) => e.role === "owner");
+    if (isOwner && !hasOwner) {
+      const ownerName = `${user?.f_name ?? ""} ${user?.l_name ?? ""}`.trim() || t("nav.owner");
+      list.unshift({
+        id: "owner",
+        name: ownerName,
+        email: user?.email || selectedPharmacy?.support_email || null,
+        salary: null,
+        role: "owner",
+      });
+    }
+    return list;
+  }, [staff, employees, isOwner, user, selectedPharmacy, t]);
+
+  const filteredStaff = useMemo(() => {
+    const q = staffSearch.trim().toLowerCase();
+    if (!q) return mergedEmployees;
+    return mergedEmployees.filter((e) => String(e.name ?? "").toLowerCase().includes(q));
+  }, [mergedEmployees, staffSearch]);
+
+  const staffRows = filteredStaff.map((p, i) => {
+    const isOwnerRow = p.role === "owner";
+    const orders = p.total_orders ?? p.total_orders_handled;
+    const sales = p.total_sales_volume;
+    const avg = p.avg_order_value ?? p.average_order_value;
+    const returns = p.total_returns ?? p.returns_count;
+    return {
+      key: `${p.id ?? p.user_id ?? p.pharmacist_id}-${i}`,
+      cells: [
+        {
+          content: (
+            <span className="flex items-center gap-2">
+              <span className="font-bold text-on-surface">{p.name ?? p.pharmacist_name}</span>
+              {isOwnerRow ? (
+                <span className="rounded-md bg-primary-container/40 px-2 py-0.5 text-[10px] font-bold text-primary">{t("nav.owner")}</span>
+              ) : (
+                <span className="rounded-md bg-surface-container-high px-2 py-0.5 text-[10px] font-bold text-on-surface-variant">{t("nav.employees")}</span>
+              )}
+            </span>
+          ),
+        },
+        { content: <span className="text-on-surface-variant">{p.email || "—"}</span> },
+        { content: <span className="tabular-nums">{p.salary != null && p.salary !== "" ? Number(p.salary).toLocaleString() : "—"}</span>, align: "end" },
+        { content: <span className="tabular-nums">{orders != null ? Number(orders).toLocaleString() : "—"}</span>, align: "end" },
+        { content: <span className="tabular-nums">{sales != null ? fmtMoney(sales) : "—"}</span>, align: "end" },
+        { content: <span className="tabular-nums">{avg != null ? fmtMoney(avg) : "—"}</span>, align: "end" },
+        { content: <span className="tabular-nums">{returns != null ? Number(returns).toLocaleString() : "—"}</span>, align: "end" },
+        { content: <span className="font-bold tabular-nums text-on-surface">{p.return_rate != null ? fmtPct(p.return_rate) : "—"}</span>, align: "end" },
+      ],
+    };
+  });
 
   const insights = ai.data?.ai_insights ?? {};
 
@@ -980,16 +1034,38 @@ export default function FinancePage() {
           )}
 
           {activeTab === "staff" && (
-            <SectionCard icon="group" title={t("finance.staffPerformance")} subtitle={t("finance.staffPerformanceSubtitle")}>
-              {staffError ? (
+            <SectionCard
+              icon="group"
+              title={t("finance.employeeList")}
+              subtitle={t("finance.staffPerformanceSubtitle")}
+              actions={
+                <div className="relative w-full sm:w-72">
+                  <span className="material-symbols-outlined pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">search</span>
+                  <input
+                    type="text"
+                    value={staffSearch}
+                    onChange={(e) => setStaffSearch(e.target.value)}
+                    placeholder={t("finance.searchEmployeeName")}
+                    className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest ps-10 pe-3 py-2.5 text-sm text-on-surface outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-primary focus:ring-2 focus:ring-primary-container/60"
+                  />
+                </div>
+              }
+            >
+              {staffError && !staff.length && employeesError && !employees ? (
                 <SectionError onRetry={() => fetchAll()} t={t} />
-              ) : loading && !staff.length ? (
+              ) : loading && mergedEmployees.length === 0 ? (
                 <SectionLoading t={t} />
+              ) : mergedEmployees.length === 0 ? (
+                <SectionEmpty icon="group" message={t("employees.noEmployees")} t={t} />
+              ) : filteredStaff.length === 0 ? (
+                <SectionEmpty icon="search_off" message={t("finance.noEmployeesMatch")} t={t} />
               ) : (
                 <DataTable
                   t={t}
                   headers={[
-                    { label: t("finance.pharmacist") },
+                    { label: t("employees.name") },
+                    { label: t("employees.email") },
+                    { label: t("employees.salary"), align: "end" },
                     { label: t("finance.totalOrders"), align: "end" },
                     { label: t("finance.totalSalesVolume"), align: "end" },
                     { label: t("finance.avgOrderValue"), align: "end" },
