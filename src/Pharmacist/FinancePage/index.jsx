@@ -35,37 +35,51 @@ const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString() : "-";
 
 const selectCls =
-  "bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all";
+  "bg-surface-container-low border border-outline-variant/30 rounded-xl px-3 py-2 text-sm text-on-surface focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all";
 
-function SectionCard({ title, subtitle, actions, children, className = "" }) {
+const STAT_TONES = {
+  default: { chip: "bg-primary-container/30 text-primary", value: "text-on-surface" },
+  green: { chip: "bg-emerald-100 text-emerald-600", value: "text-emerald-600" },
+  red: { chip: "bg-rose-100 text-rose-500", value: "text-rose-500" },
+  orange: { chip: "bg-amber-100 text-amber-500", value: "text-amber-500" },
+};
+
+function SectionCard({ icon, title, subtitle, actions, children, className = "" }) {
   return (
-    <div className={`bg-surface-container-lowest rounded-2xl border border-surface-container-high overflow-hidden ${className}`}>
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-surface-container-high">
-        <div>
-          <h2 className="font-bold text-on-surface">{title}</h2>
-          {subtitle && <p className="text-xs text-on-surface-variant mt-0.5">{subtitle}</p>}
+    <section className={`bg-surface-container-lowest rounded-2xl border border-surface-container-high overflow-hidden shadow-ambient-sm ${className}`}>
+      <header className="flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-surface-container-high">
+        <div className="flex items-center gap-3">
+          {icon && (
+            <div className="w-9 h-9 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary shadow-sm">
+              <span className="material-symbols-outlined text-lg">{icon}</span>
+            </div>
+          )}
+          <div>
+            <h2 className="font-bold text-on-surface">{title}</h2>
+            {subtitle && <p className="text-xs text-on-surface-variant/80 mt-0.5">{subtitle}</p>}
+          </div>
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
-      </div>
-      <div className="p-5">{children}</div>
-    </div>
+      </header>
+      <div className="p-5 sm:p-6">{children}</div>
+    </section>
   );
 }
 
 function StatCard({ label, value, icon, tone = "default" }) {
-  const toneCls = {
-    default: "text-on-surface",
-    green: "text-emerald-600",
-    red: "text-rose-500",
-    orange: "text-amber-500",
-  }[tone];
+  const s = STAT_TONES[tone] || STAT_TONES.default;
   return (
-    <div className="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-4">
-      <div className="flex items-center gap-2 text-on-surface-variant text-xs mb-2">
-        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'wght' 400" }}>{icon}</span>
-        <span className="font-semibold uppercase tracking-[0.05em]">{label}</span>
+    <div className="group relative overflow-hidden bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-ambient-sm">
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/[0.03] to-transparent`} />
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className={`w-10 h-10 rounded-xl ${s.chip} flex items-center justify-center shadow-sm`}>
+            <span className="material-symbols-outlined text-lg">{icon}</span>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-on-surface-variant">{label}</span>
+        </div>
+        <p className={`text-2xl font-extrabold tabular-nums tracking-tight ${s.value}`}>{value}</p>
       </div>
-      <p className={`text-xl font-extrabold tabular-nums ${toneCls}`}>{value}</p>
     </div>
   );
 }
@@ -85,8 +99,10 @@ function SectionError({ onRetry, t }) {
 function SectionEmpty({ icon, message, t }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
-      <span className="material-symbols-outlined text-3xl text-on-surface-variant/40 mb-2">{icon}</span>
-      <p className="text-sm text-on-surface-variant font-medium">{message || t("finance.noData")}</p>
+      <div className="w-14 h-14 rounded-2xl bg-surface-container/60 flex items-center justify-center mb-3">
+        <span className="material-symbols-outlined text-3xl text-on-surface-variant/40">{icon}</span>
+      </div>
+      <p className="text-sm text-on-surface-variant font-medium max-w-sm">{message || t("finance.noData")}</p>
     </div>
   );
 }
@@ -161,12 +177,15 @@ export default function FinancePage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
 
+  const [topMeds, setTopMeds] = useState(null);
+  const [topMedsLoading, setTopMedsLoading] = useState(false);
+  const [topMedsError, setTopMedsError] = useState(false);
+
   const fetchAll = useCallback(async () => {
     if (!pharmacyId) return;
     setLoading(true);
     const requests = [
       ["summary", reportsApi.financialSummary(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date })],
-      ["topMeds", reportsApi.topMedications(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date, limit: filters.topMedsLimit })],
       ["demand", reportsApi.demand(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date, radius: filters.radius, group_by: filters.groupBy, limit: filters.demandLimit })],
       ["expiring", reportsApi.expiringInventory(pharmacyId, { days: filters.days })],
       ["slowMoving", reportsApi.slowMoving(pharmacyId, { start_date: filters.start_date, end_date: filters.end_date })],
@@ -190,6 +209,25 @@ export default function FinancePage() {
     setLoading(false);
   }, [pharmacyId, filters]);
 
+  const loadTopMeds = useCallback(async (limit = filters.topMedsLimit) => {
+    if (!pharmacyId) return;
+    setTopMedsLoading(true);
+    setTopMedsError(false);
+    try {
+      const res = await reportsApi.topMedications(pharmacyId, {
+        start_date: filters.start_date,
+        end_date: filters.end_date,
+        limit,
+      });
+      setTopMeds(res?.data ?? []);
+    } catch {
+      setTopMeds([]);
+      setTopMedsError(true);
+    } finally {
+      setTopMedsLoading(false);
+    }
+  }, [pharmacyId, filters.start_date, filters.end_date, filters.topMedsLimit]);
+
   useEffect(() => { fetchAll(); /* eslint-disable-line react-hooks/set-state-in-effect */ }, [fetchAll]);
 
   const applyPreset = (days) => {
@@ -200,10 +238,12 @@ export default function FinancePage() {
     setStartDate(s);
     setEndDate(e);
     setPreset(days);
+    setTopMeds(null);
     setFilters((f) => ({ ...f, start_date: `${s}T00:00:00Z`, end_date: `${e}T23:59:59Z` }));
   };
 
   const applyRange = () => {
+    setTopMeds(null);
     setFilters((f) => ({ ...f, start_date: `${startDate}T00:00:00Z`, end_date: `${endDate}T23:59:59Z` }));
   };
 
@@ -211,8 +251,6 @@ export default function FinancePage() {
 
   const summary = data.summary;
   const summaryError = errors.summary;
-  const topMeds = data.topMeds ?? [];
-  const topMedsError = errors.topMeds;
   const demand = data.demand ?? [];
   const demandError = errors.demand;
   const expiring = data.expiring;
@@ -234,7 +272,7 @@ export default function FinancePage() {
 
   const totalOperationalLosses = operationalLosses.reduce((a, b) => a + b.value, 0);
 
-  const topMedsRows = topMeds.map((m, i) => ({
+  const topMedsRows = (topMeds ?? []).map((m, i) => ({
     key: `${m.medication_id}-${i}`,
     cells: [
       { content: <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-surface-container-high text-on-surface-variant">{m.rank}</span> },
@@ -310,286 +348,324 @@ export default function FinancePage() {
   }));
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-on-surface">{t("finance.title")}</h1>
-        <p className="text-sm text-on-surface-variant mt-1">{t("finance.subtitle")}</p>
-      </div>
+    <main className="relative p-4 sm:p-6 md:p-8 space-y-6 animate-fade-in">
+      <div className="pointer-events-none absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary/[0.04] to-transparent rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary/[0.03] to-transparent rounded-full blur-3xl" />
 
-      {/* Filter bar */}
-      <div className="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-4 flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] tracking-[0.05em] uppercase text-on-surface-variant font-bold ml-1">{t("finance.period")}</label>
-          <div className="flex gap-1.5">
-            {PRESETS.map((d) => (
-              <button
-                key={d}
-                onClick={() => applyPreset(d)}
-                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-all ${preset === d ? "bg-primary text-on-primary shadow-md" : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container"}`}
-              >
-                {t(`finance.last${d}Days`)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] tracking-[0.05em] uppercase text-on-surface-variant font-bold ml-1">{t("finance.startDate")}</label>
-          <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPreset(null); }} className={selectCls} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] tracking-[0.05em] uppercase text-on-surface-variant font-bold ml-1">{t("finance.endDate")}</label>
-          <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPreset(null); }} className={selectCls} />
-        </div>
-        <button
-          onClick={applyRange}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2"
-        >
-          <span className="material-symbols-outlined text-lg">refresh</span>
-          {t("finance.apply")}
-        </button>
-      </div>
-
-      {/* Financial summary */}
-      <SectionCard title={t("finance.summary")} subtitle={summary?.period ? `${fmtDate(summary.period.start_date)} — ${fmtDate(summary.period.end_date)}` : undefined}>
-        {summaryError ? (
-          <SectionError onRetry={fetchAll} t={t} />
-        ) : loading && !summary ? (
-          <SectionLoading t={t} />
-        ) : !summary ? (
-          <SectionEmpty icon="monitoring" t={t} />
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-              <StatCard label={t("finance.grossSales")} value={fmtMoney(summary.gross_sales)} icon="point_of_sale" />
-              <StatCard label={t("finance.netRevenue")} value={fmtMoney(summary.net_revenue)} icon="payments" />
-              <StatCard label={t("finance.cogs")} value={fmtMoney(summary.cogs)} icon="inventory_2" />
-              <StatCard label={t("finance.grossProfit")} value={fmtMoney(summary.gross_profit)} icon="trending_up" tone="green" />
-              <StatCard label={t("finance.returns")} value={fmtMoney(summary.returns)} icon="replay" tone="orange" />
-              <StatCard label={t("finance.operationalLosses")} value={fmtMoney(totalOperationalLosses)} icon="receipt_long" tone="red" />
-              <StatCard label={t("finance.expiredOnHandLoss")} value={fmtMoney(summary.expired_on_hand_loss)} icon="history_toggle_off" tone="red" />
-              <StatCard label={t("finance.netProfit")} value={fmtMoney(summary.net_profit)} icon="savings" tone="green" />
+      <div className="relative z-10 space-y-6">
+        {/* Header */}
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-primary-container/30 text-primary flex items-center justify-center shadow-sm">
+              <span className="material-symbols-outlined text-2xl">savings</span>
             </div>
+            <div>
+              <h1 className="text-2xl font-bold text-on-surface tracking-tight">{t("finance.title")}</h1>
+              <p className="text-sm text-on-surface-variant/80 mt-0.5">{t("finance.subtitle")}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => loadTopMeds()}
+            disabled={topMedsLoading}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:pointer-events-none"
+          >
+            {topMedsLoading ? (
+              <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <span className="material-symbols-outlined text-lg">leaderboard</span>
+            )}
+            {topMedsLoading ? t("finance.loading") : t("finance.mostRequested")}
+          </button>
+        </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.expenseBreakdown")}</h3>
-                {breakdownData.length ? (
-                  <div className="h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={breakdownData} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-high)" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--on-surface-variant)" }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "var(--on-surface-variant)" }} tickLine={false} axisLine={false} />
-                        <Tooltip formatter={(v) => fmtMoney(v)} cursor={{ fill: "var(--surface-container-high)" }} />
-                        <Bar dataKey="value" fill="var(--primary)" radius={[6, 6, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <SectionEmpty icon="bar_chart" t={t} />
-                )}
+        {/* Filter bar */}
+        <div className="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-ambient-sm p-4 sm:p-5 flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] tracking-[0.05em] uppercase text-on-surface-variant font-bold ml-1">{t("finance.period")}</label>
+            <div className="flex gap-1.5">
+              {PRESETS.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => applyPreset(d)}
+                  className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-all ${preset === d ? "bg-primary text-on-primary shadow-md" : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container"}`}
+                >
+                  {t(`finance.last${d}Days`)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] tracking-[0.05em] uppercase text-on-surface-variant font-bold ml-1">{t("finance.startDate")}</label>
+            <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPreset(null); }} className={selectCls} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] tracking-[0.05em] uppercase text-on-surface-variant font-bold ml-1">{t("finance.endDate")}</label>
+            <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPreset(null); }} className={selectCls} />
+          </div>
+          <button
+            onClick={applyRange}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-lg">refresh</span>
+            {t("finance.apply")}
+          </button>
+        </div>
+
+        {/* Financial summary */}
+        <SectionCard icon="monitoring" title={t("finance.summary")} subtitle={summary?.period ? `${fmtDate(summary.period.start_date)} — ${fmtDate(summary.period.end_date)}` : undefined}>
+          {summaryError ? (
+            <SectionError onRetry={fetchAll} t={t} />
+          ) : loading && !summary ? (
+            <SectionLoading t={t} />
+          ) : !summary ? (
+            <SectionEmpty icon="monitoring" t={t} />
+          ) : (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <StatCard label={t("finance.grossSales")} value={fmtMoney(summary.gross_sales)} icon="point_of_sale" />
+                <StatCard label={t("finance.netRevenue")} value={fmtMoney(summary.net_revenue)} icon="payments" />
+                <StatCard label={t("finance.cogs")} value={fmtMoney(summary.cogs)} icon="inventory_2" />
+                <StatCard label={t("finance.grossProfit")} value={fmtMoney(summary.gross_profit)} icon="trending_up" tone="green" />
+                <StatCard label={t("finance.returns")} value={fmtMoney(summary.returns)} icon="replay" tone="orange" />
+                <StatCard label={t("finance.operationalLosses")} value={fmtMoney(totalOperationalLosses)} icon="receipt_long" tone="red" />
+                <StatCard label={t("finance.expiredOnHandLoss")} value={fmtMoney(summary.expired_on_hand_loss)} icon="history_toggle_off" tone="red" />
+                <StatCard label={t("finance.netProfit")} value={fmtMoney(summary.net_profit)} icon="savings" tone="green" />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.operationalLosses")}</h3>
-                {operationalLosses.length ? (
-                  <div className="space-y-2">
-                    {operationalLosses.map((l) => (
-                      <div key={l.name} className="flex items-center justify-between p-3.5 rounded-xl bg-surface-container/40">
-                        <span className="text-sm text-on-surface-variant">{l.name}</span>
-                        <span className="font-bold text-rose-500 tabular-nums">{fmtMoney(l.value)}</span>
-                      </div>
-                    ))}
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-rose-50">
-                      <span className="text-sm font-bold text-rose-600">{t("finance.total")}</span>
-                      <span className="font-bold text-rose-600 tabular-nums">{fmtMoney(totalOperationalLosses)}</span>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.expenseBreakdown")}</h3>
+                  {breakdownData.length ? (
+                    <div className="h-56">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={breakdownData} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-high)" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--on-surface-variant)" }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "var(--on-surface-variant)" }} tickLine={false} axisLine={false} />
+                          <Tooltip formatter={(v) => fmtMoney(v)} cursor={{ fill: "var(--surface-container-high)" }} />
+                          <Bar dataKey="value" fill="var(--primary)" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
-                  </div>
-                ) : (
-                  <SectionEmpty icon="list_alt" t={t} />
-                )}
+                  ) : (
+                    <SectionEmpty icon="bar_chart" t={t} />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.operationalLosses")}</h3>
+                  {operationalLosses.length ? (
+                    <div className="space-y-2">
+                      {operationalLosses.map((l) => (
+                        <div key={l.name} className="flex items-center justify-between p-3.5 rounded-xl bg-surface-container/40">
+                          <span className="text-sm text-on-surface-variant">{l.name}</span>
+                          <span className="font-bold text-rose-500 tabular-nums">{fmtMoney(l.value)}</span>
+                        </div>
+                      ))}
+                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-rose-50">
+                        <span className="text-sm font-bold text-rose-600">{t("finance.total")}</span>
+                        <span className="font-bold text-rose-600 tabular-nums">{fmtMoney(totalOperationalLosses)}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <SectionEmpty icon="list_alt" t={t} />
+                  )}
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </SectionCard>
+            </>
+          )}
+        </SectionCard>
 
-      {/* Top medications */}
-      <SectionCard
-        title={t("finance.topMedications")}
-        subtitle={t("finance.topMedicationsSubtitle")}
-        actions={
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.limit")}</label>
-            <select className={selectCls} value={filters.topMedsLimit} onChange={(e) => setFilter({ topMedsLimit: Number(e.target.value) })}>
-              {TOP_MEDS_LIMITS.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-        }
-      >
-        {topMedsError ? (
-          <SectionError onRetry={fetchAll} t={t} />
-        ) : loading && !topMeds.length ? (
-          <SectionLoading t={t} />
-        ) : (
-          <DataTable
-            t={t}
-            headers={[
-              { label: t("finance.rank") },
-              { label: t("finance.medication") },
-              { label: t("finance.qtySold"), align: "end" },
-              { label: t("finance.unitPrice"), align: "end" },
-              { label: t("finance.unitCost"), align: "end" },
-              { label: t("finance.profit"), align: "end" },
-            ]}
-            rows={topMedsRows}
-          />
-        )}
-      </SectionCard>
-
-      {/* Demand */}
-      <SectionCard
-        title={t("finance.demand")}
-        subtitle={t("finance.demandSubtitle")}
-        actions={
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.groupBy")}</label>
-              <select className={selectCls} value={filters.groupBy} onChange={(e) => setFilter({ groupBy: e.target.value })}>
-                {GROUP_BY_OPTIONS.map((g) => <option key={g} value={g}>{t(`finance.${g}`)}</option>)}
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.radius")}</label>
-              <select className={selectCls} value={filters.radius} onChange={(e) => setFilter({ radius: Number(e.target.value) })}>
-                {RADIUS_OPTIONS.map((r) => <option key={r} value={r}>{r} km</option>)}
-              </select>
-            </div>
+        {/* Most requested medications */}
+        <SectionCard
+          icon="leaderboard"
+          title={t("finance.mostRequested")}
+          subtitle={t("finance.topMedicationsSubtitle")}
+          actions={
             <div className="flex items-center gap-2">
               <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.limit")}</label>
-              <select className={selectCls} value={filters.demandLimit} onChange={(e) => setFilter({ demandLimit: Number(e.target.value) })}>
-                {DEMAND_LIMITS.map((l) => <option key={l} value={l}>{l}</option>)}
+              <select
+                className={selectCls}
+                value={filters.topMedsLimit}
+                onChange={(e) => {
+                  const l = Number(e.target.value);
+                  setFilter({ topMedsLimit: l });
+                  if (topMeds) loadTopMeds(l);
+                }}
+              >
+                {TOP_MEDS_LIMITS.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
-          </div>
-        }
-      >
-        {demandError ? (
-          <SectionError onRetry={fetchAll} t={t} />
-        ) : loading && !demand.length ? (
-          <SectionLoading t={t} />
-        ) : (
-          <DataTable
-            t={t}
-            headers={[
-              { label: t("finance.rank") },
-              { label: t("finance.groupKey") },
-              { label: t("finance.groupType") },
-              { label: t("finance.searchCount"), align: "end" },
-              { label: t("finance.radiusKm"), align: "end" },
-            ]}
-            rows={demandRows}
-          />
-        )}
-      </SectionCard>
+          }
+        >
+          {topMedsLoading ? (
+            <SectionLoading t={t} />
+          ) : topMedsError ? (
+            <SectionError onRetry={() => loadTopMeds()} t={t} />
+          ) : !topMeds ? (
+            <SectionEmpty icon="leaderboard" message={t("finance.topMedsPrompt")} t={t} />
+          ) : (
+            <DataTable
+              t={t}
+              headers={[
+                { label: t("finance.rank") },
+                { label: t("finance.medication") },
+                { label: t("finance.qtySold"), align: "end" },
+                { label: t("finance.unitPrice"), align: "end" },
+                { label: t("finance.unitCost"), align: "end" },
+                { label: t("finance.profit"), align: "end" },
+              ]}
+              rows={topMedsRows}
+            />
+          )}
+        </SectionCard>
 
-      {/* Expiring inventory */}
-      <SectionCard
-        title={t("finance.expiringInventory")}
-        subtitle={expiring ? `${t("finance.totalExpiredLoss")}: ${fmtMoney(expiring.total_expired_loss)} · ${t("finance.totalNearingExpiryValue")}: ${fmtMoney(expiring.total_nearing_expiry_value)}` : undefined}
-        actions={
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.alertWindow")}</label>
-            <select className={selectCls} value={filters.days} onChange={(e) => setFilter({ days: Number(e.target.value) })}>
-              {[7, 15, 30, 60, 90, 180, 365].map((d) => <option key={d} value={d}>{d} {t("finance.days")}</option>)}
-            </select>
-          </div>
-        }
-      >
-        {expiringError ? (
-          <SectionError onRetry={fetchAll} t={t} />
-        ) : loading && !expiring ? (
-          <SectionLoading t={t} />
-        ) : !expiring ? (
-          <SectionEmpty icon="update" t={t} />
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.expiredBatches")}</h3>
-              <DataTable
-                t={t}
-                headers={[
-                  { label: t("finance.batch") },
-                  { label: t("finance.medication") },
-                  { label: t("finance.expirationDate"), align: "end" },
-                  { label: t("finance.quantity"), align: "end" },
-                  { label: t("finance.lossValue"), align: "end" },
-                ]}
-                rows={expiredRows}
-              />
+        {/* Demand */}
+        <SectionCard
+          icon="public"
+          title={t("finance.demand")}
+          subtitle={t("finance.demandSubtitle")}
+          actions={
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.groupBy")}</label>
+                <select className={selectCls} value={filters.groupBy} onChange={(e) => setFilter({ groupBy: e.target.value })}>
+                  {GROUP_BY_OPTIONS.map((g) => <option key={g} value={g}>{t(`finance.${g}`)}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.radius")}</label>
+                <select className={selectCls} value={filters.radius} onChange={(e) => setFilter({ radius: Number(e.target.value) })}>
+                  {RADIUS_OPTIONS.map((r) => <option key={r} value={r}>{r} km</option>)}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.limit")}</label>
+                <select className={selectCls} value={filters.demandLimit} onChange={(e) => setFilter({ demandLimit: Number(e.target.value) })}>
+                  {DEMAND_LIMITS.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.nearingExpiry")}</h3>
-              <DataTable
-                t={t}
-                headers={[
-                  { label: t("finance.batch") },
-                  { label: t("finance.medication") },
-                  { label: t("finance.expirationDate"), align: "end" },
-                  { label: t("finance.daysUntilExpiry"), align: "end" },
-                  { label: t("finance.quantity"), align: "end" },
-                  { label: t("finance.stockValue"), align: "end" },
-                ]}
-                rows={nearingRows}
-              />
+          }
+        >
+          {demandError ? (
+            <SectionError onRetry={fetchAll} t={t} />
+          ) : loading && !demand.length ? (
+            <SectionLoading t={t} />
+          ) : (
+            <DataTable
+              t={t}
+              headers={[
+                { label: t("finance.rank") },
+                { label: t("finance.groupKey") },
+                { label: t("finance.groupType") },
+                { label: t("finance.searchCount"), align: "end" },
+                { label: t("finance.radiusKm"), align: "end" },
+              ]}
+              rows={demandRows}
+            />
+          )}
+        </SectionCard>
+
+        {/* Expiring inventory */}
+        <SectionCard
+          icon="update"
+          title={t("finance.expiringInventory")}
+          subtitle={expiring ? `${t("finance.totalExpiredLoss")}: ${fmtMoney(expiring.total_expired_loss)} · ${t("finance.totalNearingExpiryValue")}: ${fmtMoney(expiring.total_nearing_expiry_value)}` : undefined}
+          actions={
+            <div className="flex items-center gap-2">
+              <label className="text-[11px] uppercase tracking-[0.05em] text-on-surface-variant font-bold">{t("finance.alertWindow")}</label>
+              <select className={selectCls} value={filters.days} onChange={(e) => setFilter({ days: Number(e.target.value) })}>
+                {[7, 15, 30, 60, 90, 180, 365].map((d) => <option key={d} value={d}>{d} {t("finance.days")}</option>)}
+              </select>
             </div>
-          </div>
-        )}
-      </SectionCard>
+          }
+        >
+          {expiringError ? (
+            <SectionError onRetry={fetchAll} t={t} />
+          ) : loading && !expiring ? (
+            <SectionLoading t={t} />
+          ) : !expiring ? (
+            <SectionEmpty icon="update" t={t} />
+          ) : (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.expiredBatches")}</h3>
+                <DataTable
+                  t={t}
+                  headers={[
+                    { label: t("finance.batch") },
+                    { label: t("finance.medication") },
+                    { label: t("finance.expirationDate"), align: "end" },
+                    { label: t("finance.quantity"), align: "end" },
+                    { label: t("finance.lossValue"), align: "end" },
+                  ]}
+                  rows={expiredRows}
+                />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-on-surface mb-3">{t("finance.nearingExpiry")}</h3>
+                <DataTable
+                  t={t}
+                  headers={[
+                    { label: t("finance.batch") },
+                    { label: t("finance.medication") },
+                    { label: t("finance.expirationDate"), align: "end" },
+                    { label: t("finance.daysUntilExpiry"), align: "end" },
+                    { label: t("finance.quantity"), align: "end" },
+                    { label: t("finance.stockValue"), align: "end" },
+                  ]}
+                  rows={nearingRows}
+                />
+              </div>
+            </div>
+          )}
+        </SectionCard>
 
-      {/* Slow moving */}
-      <SectionCard title={t("finance.slowMoving")} subtitle={t("finance.slowMovingSubtitle")}>
-        {slowMovingError ? (
-          <SectionError onRetry={fetchAll} t={t} />
-        ) : loading && !slowMoving.length ? (
-          <SectionLoading t={t} />
-        ) : (
-          <DataTable
-            t={t}
-            headers={[
-              { label: t("finance.inventoryItem") },
-              { label: t("finance.medication") },
-              { label: t("finance.batch") },
-              { label: t("finance.stockQuantity"), align: "end" },
-              { label: t("finance.lastSaleDate"), align: "end" },
-              { label: t("finance.daysWithoutSale"), align: "end" },
-              { label: t("finance.stockValue"), align: "end" },
-            ]}
-            rows={slowMovingRows}
-          />
-        )}
-      </SectionCard>
+        {/* Slow moving */}
+        <SectionCard icon="hourglass_bottom" title={t("finance.slowMoving")} subtitle={t("finance.slowMovingSubtitle")}>
+          {slowMovingError ? (
+            <SectionError onRetry={fetchAll} t={t} />
+          ) : loading && !slowMoving.length ? (
+            <SectionLoading t={t} />
+          ) : (
+            <DataTable
+              t={t}
+              headers={[
+                { label: t("finance.inventoryItem") },
+                { label: t("finance.medication") },
+                { label: t("finance.batch") },
+                { label: t("finance.stockQuantity"), align: "end" },
+                { label: t("finance.lastSaleDate"), align: "end" },
+                { label: t("finance.daysWithoutSale"), align: "end" },
+                { label: t("finance.stockValue"), align: "end" },
+              ]}
+              rows={slowMovingRows}
+            />
+          )}
+        </SectionCard>
 
-      {/* Staff performance */}
-      <SectionCard title={t("finance.staffPerformance")} subtitle={t("finance.staffPerformanceSubtitle")}>
-        {staffError ? (
-          <SectionError onRetry={fetchAll} t={t} />
-        ) : loading && !staff.length ? (
-          <SectionLoading t={t} />
-        ) : (
-          <DataTable
-            t={t}
-            headers={[
-              { label: t("finance.pharmacist") },
-              { label: t("finance.totalOrders"), align: "end" },
-              { label: t("finance.totalSalesVolume"), align: "end" },
-              { label: t("finance.avgOrderValue"), align: "end" },
-              { label: t("finance.returnsCount"), align: "end" },
-              { label: t("finance.returnRate"), align: "end" },
-            ]}
-            rows={staffRows}
-          />
-        )}
-      </SectionCard>
-    </div>
+        {/* Staff performance */}
+        <SectionCard icon="group" title={t("finance.staffPerformance")} subtitle={t("finance.staffPerformanceSubtitle")}>
+          {staffError ? (
+            <SectionError onRetry={fetchAll} t={t} />
+          ) : loading && !staff.length ? (
+            <SectionLoading t={t} />
+          ) : (
+            <DataTable
+              t={t}
+              headers={[
+                { label: t("finance.pharmacist") },
+                { label: t("finance.totalOrders"), align: "end" },
+                { label: t("finance.totalSalesVolume"), align: "end" },
+                { label: t("finance.avgOrderValue"), align: "end" },
+                { label: t("finance.returnsCount"), align: "end" },
+                { label: t("finance.returnRate"), align: "end" },
+              ]}
+              rows={staffRows}
+            />
+          )}
+        </SectionCard>
+      </div>
+    </main>
   );
 }

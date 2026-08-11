@@ -571,6 +571,8 @@
     "loss_salaries": "Salaries",
     "topMedications": "Top Medications",
     "topMedicationsSubtitle": "Most profitable medications in the selected period.",
+    "mostRequested": "Most Requested Medications",
+    "topMedsPrompt": "Click the button to load the most requested medications for the selected period.",
     "qtySold": "Qty Sold",
     "unitPrice": "Unit Price",
     "unitCost": "Unit Cost",
