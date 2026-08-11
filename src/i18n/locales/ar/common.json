@@ -600,7 +600,23 @@
     "totalSalesVolume": "حجم المبيعات",
     "avgOrderValue": "متوسط قيمة الطلب",
     "returnsCount": "المرتجعات",
-    "returnRate": "نسبة المرتجعات"
+    "returnRate": "نسبة المرتجعات",
+    "tabOverview": "نظرة عامة",
+    "tabMedications": "الأدوية",
+    "tabInventory": "المخزون",
+    "tabStaff": "الموظفون",
+    "tabAiInsights": "رؤى الذكاء الاصطناعي",
+    "aiInsights": "رؤى الذكاء الاصطناعي",
+    "generateAiReport": "توليد تقرير الذكاء الاصطناعي",
+    "generating": "جارٍ التوليد...",
+    "aiInsightsPrompt": "أنشئ ملخصًا مدعومًا بالذكاء الاصطناعي لأداء صيدليتك في الفترة المحددة.",
+    "executiveSummary": "الملخص التنفيذي",
+    "financialHealthScore": "مؤشر الصحة المالية",
+    "keyFindings": "النتائج الرئيسية",
+    "recommendations": "التوصيات",
+    "inventoryRiskAlerts": "تنبيهات مخاطر المخزون",
+    "generationPending": "جارٍ إنشاء تقرير الذكاء الاصطناعي. حدّث بعد قليل.",
+    "refresh": "تحديث"
   },
 
   "pharmacy": {

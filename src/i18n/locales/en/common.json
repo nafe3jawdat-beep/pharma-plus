@@ -614,7 +614,23 @@
     "totalSalesVolume": "Sales Volume",
     "avgOrderValue": "Avg Order Value",
     "returnsCount": "Returns",
-    "returnRate": "Return Rate"
+    "returnRate": "Return Rate",
+    "tabOverview": "Overview",
+    "tabMedications": "Medications",
+    "tabInventory": "Inventory",
+    "tabStaff": "Staff",
+    "tabAiInsights": "AI Insights",
+    "aiInsights": "AI Insights",
+    "generateAiReport": "Generate AI Report",
+    "generating": "Generating...",
+    "aiInsightsPrompt": "Generate an AI-powered summary of your pharmacy's performance for the selected period.",
+    "executiveSummary": "Executive Summary",
+    "financialHealthScore": "Financial Health Score",
+    "keyFindings": "Key Findings",
+    "recommendations": "Recommendations",
+    "inventoryRiskAlerts": "Inventory Risk Alerts",
+    "generationPending": "The AI report is being generated. Refresh in a moment.",
+    "refresh": "Refresh"
   },
 
   "pharmacy": {

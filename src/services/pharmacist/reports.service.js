@@ -13,4 +13,8 @@ export const reportsApi = {
     api("GET", `/api/v1/pharmacist/pharmacies/${pharmacyId}/reports/slow-moving`, { params }),
   staffPerformance: (pharmacyId, params) =>
     api("GET", `/api/v1/pharmacist/pharmacies/${pharmacyId}/reports/staff-performance`, { params }),
+  aiInsights: (pharmacyId) =>
+    api("GET", `/api/v1/pharmacist/pharmacies/${pharmacyId}/reports/ai-insights`),
+  generateAiInsights: (pharmacyId, params) =>
+    api("POST", `/api/v1/pharmacist/pharmacies/${pharmacyId}/reports/ai-insights`, { params }),
 };
