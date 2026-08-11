@@ -36,6 +36,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
@@ -239,7 +240,17 @@ const Login = () => {
             )}
 
             <InputField id="email" label={t("auth.email")} type="email" value={formData.email} onChange={handleChange} error={errors.email} />
-            <InputField id="password" label={t("auth.password")} type="password" value={formData.password} onChange={handleChange} error={errors.password} />
+            <InputField
+              id="password"
+              label={t("auth.password")}
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              error={errors.password}
+              showToggle
+              isVisible={showPassword}
+              onToggleVisibility={() => setShowPassword(!showPassword)}
+            />
 
             <div className="flex justify-end -mt-2">
               <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">
@@ -268,17 +279,30 @@ const Login = () => {
   );
 };
 
-const InputField = ({ id, label, type = "text", value, onChange, error }) => (
+const InputField = ({ id, label, type = "text", value, onChange, error, showToggle, isVisible, onToggleVisibility }) => (
   <div className="flex flex-col space-y-1.5">
     <label className="text-[0.75rem] font-bold uppercase text-on-surface-variant ml-1">{label}</label>
-    <input
-      id={id} type={type} value={value} onChange={onChange}
-      className={`w-full px-4 py-3 rounded-xl bg-surface-container-high border text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 transition-all ${
-        error
-          ? 'border-rose-300 focus:ring-rose-200 focus:border-rose-400'
-          : 'border-surface-container-high focus:ring-primary/30 focus:border-primary'
-      }`}
-    />
+    <div className="relative">
+      <input
+        id={id} type={type} value={value} onChange={onChange}
+        className={`w-full px-4 py-3 rounded-xl bg-surface-container-high border text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 transition-all ${
+          showToggle ? 'pe-12' : ''
+        } ${
+          error
+            ? 'border-rose-300 focus:ring-rose-200 focus:border-rose-400'
+            : 'border-surface-container-high focus:ring-primary/30 focus:border-primary'
+        }`}
+      />
+      {showToggle && (
+        <button
+          type="button"
+          onClick={onToggleVisibility}
+          className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+        >
+          <span className="material-symbols-outlined text-xl">{isVisible ? 'visibility_off' : 'visibility'}</span>
+        </button>
+      )}
+    </div>
     {error && <p className="text-xs text-rose-500 font-medium ml-1">{error}</p>}
   </div>
 );

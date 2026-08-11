@@ -77,6 +77,8 @@ export default function Register() {
     company_phone: '', license_number: '', license_image: null,
   });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
@@ -284,8 +286,8 @@ export default function Register() {
                 <InputField id="phone_number" label={t("auth.phoneNumber")} type="tel" value={formData.phone_number} onChange={handleChange} error={errors.phone_number} placeholder={t("placeholders.phoneExample")} />
 
                 <div className="flex gap-4">
-                  <InputField id="password" label={t("auth.password")} type="password" value={formData.password} onChange={handleChange} error={errors.password} placeholder={t("placeholders.passwordHint")} containerClass="flex-1" />
-                  <InputField id="password_confirmation" label={t("auth.confirmPassword")} type="password" value={formData.password_confirmation} onChange={handleChange} error={errors.password_confirmation} placeholder={t("placeholders.reEnterPassword")} containerClass="flex-1" />
+                  <InputField id="password" label={t("auth.password")} type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} error={errors.password} placeholder={t("placeholders.passwordHint")} containerClass="flex-1" showToggle isVisible={showPassword} onToggleVisibility={() => setShowPassword(!showPassword)} />
+                  <InputField id="password_confirmation" label={t("auth.confirmPassword")} type={showConfirmPassword ? "text" : "password"} value={formData.password_confirmation} onChange={handleChange} error={errors.password_confirmation} placeholder={t("placeholders.reEnterPassword")} containerClass="flex-1" showToggle isVisible={showConfirmPassword} onToggleVisibility={() => setShowConfirmPassword(!showConfirmPassword)} />
                 </div>
 
                 <div className="flex gap-4">
@@ -409,18 +411,31 @@ export default function Register() {
   );
 }
 
-function InputField({ id, label, type = "text", value, onChange, error, placeholder, containerClass = "" }) {
+function InputField({ id, label, type = "text", value, onChange, error, placeholder, containerClass = "", showToggle, isVisible, onToggleVisibility }) {
   return (
     <div className={`flex flex-col space-y-1.5 ${containerClass}`}>
       <label className="text-[0.75rem] font-bold uppercase text-on-surface-variant ml-1">{label}</label>
-      <input
-        id={id} type={type} value={value} onChange={onChange} placeholder={placeholder}
-        className={`w-full px-4 py-3 rounded-xl bg-surface-container-high border text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 transition-all ${
-          error
-            ? 'border-rose-300 focus:ring-rose-200 focus:border-rose-400'
-            : 'border-surface-container-high focus:ring-primary/30 focus:border-primary'
-        }`}
-      />
+      <div className="relative">
+        <input
+          id={id} type={type} value={value} onChange={onChange} placeholder={placeholder}
+          className={`w-full px-4 py-3 rounded-xl bg-surface-container-high border text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 transition-all ${
+            showToggle ? 'pe-12' : ''
+          } ${
+            error
+              ? 'border-rose-300 focus:ring-rose-200 focus:border-rose-400'
+              : 'border-surface-container-high focus:ring-primary/30 focus:border-primary'
+          }`}
+        />
+        {showToggle && (
+          <button
+            type="button"
+            onClick={onToggleVisibility}
+            className="absolute end-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+          >
+            <span className="material-symbols-outlined text-xl">{isVisible ? 'visibility_off' : 'visibility'}</span>
+          </button>
+        )}
+      </div>
       {error && <p className="text-xs text-rose-500 font-medium ml-1">{error}</p>}
     </div>
   );
