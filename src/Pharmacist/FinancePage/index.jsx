@@ -832,14 +832,14 @@ export default function FinancePage() {
                             <BarChart data={breakdownData} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
                               <defs>
                                 <linearGradient id="expenseBar" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.95} />
-                                  <stop offset="100%" stopColor="var(--primary-dim)" stopOpacity={0.75} />
+                                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.95} />
+                                  <stop offset="100%" stopColor="var(--color-primary-dim)" stopOpacity={0.75} />
                                 </linearGradient>
                               </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-container-high)" vertical={false} />
-                              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--on-surface-variant)" }} tickLine={false} axisLine={false} />
-                              <YAxis tick={{ fontSize: 11, fill: "var(--on-surface-variant)" }} tickLine={false} axisLine={false} />
-                              <Tooltip content={<ChartTooltip formatter={fmtMoney} />} cursor={{ fill: "var(--surface-container-high)" }} />
+                              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-container-high)" vertical={false} />
+                              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--color-on-surface-variant)" }} tickLine={false} axisLine={false} />
+                              <YAxis tick={{ fontSize: 11, fill: "var(--color-on-surface-variant)" }} tickLine={false} axisLine={false} />
+                              <Tooltip content={<ChartTooltip formatter={fmtMoney} />} cursor={{ fill: "var(--color-surface-container-high)" }} />
                               <Bar dataKey="value" fill="url(#expenseBar)" radius={[8, 8, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
