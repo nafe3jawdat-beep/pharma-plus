@@ -3,11 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
   Tooltip,
 } from "recharts";
 import { reportsApi, employeeService } from "../../services/pharmacist";
@@ -38,6 +36,17 @@ const fmtPct = (v) => (v == null ? "-" : `${(Number(v) * 100).toFixed(1)}%`);
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString() : "-";
+
+const EXPENSE_COLORS = [
+  "var(--color-primary)",
+  "#0ea5e9",
+  "#8b5cf6",
+  "#f59e0b",
+  "#f43f5e",
+  "#10b981",
+  "#ef4444",
+  "#06b6d4",
+];
 
 const selectCls =
   "w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-3 py-2.5 text-sm text-on-surface outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary-container/60";
@@ -371,14 +380,19 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
   );
 }
 
-function ChartTooltip({ active, payload, label, formatter }) {
+function ExpensePieTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
+  const p = payload[0];
   return (
     <div className="rounded-xl border border-surface-container-high bg-surface-container-lowest px-3.5 py-2.5 shadow-ambient">
-      <p className="mb-1 text-xs font-bold text-on-surface">{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} className="text-sm font-bold tabular-nums text-primary">{formatter ? formatter(p.value) : p.value}</p>
-      ))}
+      <p className="mb-1 flex items-center gap-1.5 text-xs font-bold text-on-surface">
+        <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.payload?.color }} />
+        {p.name}
+      </p>
+      <p className="text-sm font-bold tabular-nums text-primary">{fmtMoney(p.value)}</p>
+      {p.payload?.percent != null && (
+        <p className="mt-0.5 text-xs text-on-surface-variant">{fmtPct(p.payload.percent)}</p>
+      )}
     </div>
   );
 }
@@ -546,6 +560,16 @@ export default function FinancePage() {
         name: t(`Reports.expense_${k}`, { defaultValue: k }),
         value: Number(v ?? 0),
       }));
+
+  const expenseTotal = breakdownData.reduce((a, b) => a + b.value, 0);
+  const sortedBreakdown = [...breakdownData]
+    .filter((d) => d.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .map((d, i) => ({
+      ...d,
+      color: EXPENSE_COLORS[i % EXPENSE_COLORS.length],
+      percent: expenseTotal > 0 ? d.value / expenseTotal : 0,
+    }));
 
   const LOSS_KEY_MAP = { damaged_cost: "damages", expenses: "expenses", salaries: "salaries" };
   const operationalLosses = Object.entries(summary?.operational_losses ?? {}).map(([k, v]) => ({
@@ -825,27 +849,56 @@ export default function FinancePage() {
                 ) : (
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div>
-                      <h3 className="mb-3 text-sm font-bold text-on-surface">{t("Reports.expenseBreakdown")}</h3>
-                      {breakdownData.length ? (
-                        <div className="h-60">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={breakdownData} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
-                              <defs>
-                                <linearGradient id="expenseBar" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.95} />
-                                  <stop offset="100%" stopColor="var(--color-primary-dim)" stopOpacity={0.75} />
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-container-high)" vertical={false} />
-                              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--color-on-surface-variant)" }} tickLine={false} axisLine={false} />
-                              <YAxis tick={{ fontSize: 11, fill: "var(--color-on-surface-variant)" }} tickLine={false} axisLine={false} />
-                              <Tooltip content={<ChartTooltip formatter={fmtMoney} />} cursor={{ fill: "var(--color-surface-container-high)" }} />
-                              <Bar dataKey="value" fill="url(#expenseBar)" radius={[8, 8, 0, 0]} />
-                            </BarChart>
-                          </ResponsiveContainer>
+                      <div className="mb-3 flex items-center justify-between gap-2">
+                        <h3 className="text-sm font-bold text-on-surface">{t("Reports.expenseBreakdown")}</h3>
+                        {sortedBreakdown.length > 0 && (
+                          <span className="rounded-lg bg-primary-container/40 px-2.5 py-1 text-xs font-bold tabular-nums text-primary">
+                            {t("Reports.total")}: {fmtMoney(expenseTotal)}
+                          </span>
+                        )}
+                      </div>
+                      {sortedBreakdown.length ? (
+                        <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[auto_1fr]">
+                          <div className="relative mx-auto h-52 w-52">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={sortedBreakdown}
+                                  dataKey="value"
+                                  nameKey="name"
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius="68%"
+                                  outerRadius="94%"
+                                  paddingAngle={2}
+                                  stroke="var(--color-surface-container-lowest)"
+                                  strokeWidth={2}
+                                >
+                                  {sortedBreakdown.map((d) => (
+                                    <Cell key={d.name} fill={d.color} />
+                                  ))}
+                                </Pie>
+                                <Tooltip content={<ExpensePieTooltip />} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-on-surface-variant">{t("Reports.total")}</span>
+                              <span className="mt-0.5 text-xl font-bold tabular-nums text-on-surface">{fmtMoney(expenseTotal)}</span>
+                            </div>
+                          </div>
+                          <ul className="flex flex-col gap-1">
+                            {sortedBreakdown.map((d) => (
+                              <li key={d.name} className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-surface-container/60">
+                                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
+                                <span className="flex-1 truncate text-sm text-on-surface-variant">{d.name}</span>
+                                <span className="text-xs font-bold tabular-nums text-on-surface-variant/70">{fmtPct(d.percent)}</span>
+                                <span className="w-24 text-end text-sm font-bold tabular-nums text-on-surface">{fmtMoney(d.value)}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       ) : (
-                        <SectionEmpty icon="bar_chart" t={t} />
+                        <SectionEmpty icon="pie_chart" t={t} />
                       )}
                     </div>
                     <div>
