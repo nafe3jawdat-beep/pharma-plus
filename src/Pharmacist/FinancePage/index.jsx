@@ -878,7 +878,7 @@ export default function FinancePage() {
                                     <Cell key={d.name} fill={d.color} />
                                   ))}
                                 </Pie>
-                                <Tooltip content={<ExpensePieTooltip />} />
+                                <Tooltip content={<ExpensePieTooltip />} wrapperStyle={{ zIndex: 50 }} />
                               </PieChart>
                             </ResponsiveContainer>
                             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
