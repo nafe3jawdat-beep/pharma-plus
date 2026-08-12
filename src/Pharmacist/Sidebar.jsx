@@ -163,7 +163,7 @@ export default function Sidebar({ pharmacies, selectedPharmacy, setSelectedPharm
             </NavLink>
             <NavLink to="/Dashboard/Finance" className={linkClass}>
               <span className="material-symbols-outlined">account_balance</span>
-              {t("nav.finance")}
+              {t("nav.Reports")}
             </NavLink>
             <NavLink to="/Dashboard/AnalyticsPage" className={linkClass}>
               <span className="material-symbols-outlined">monitoring</span>

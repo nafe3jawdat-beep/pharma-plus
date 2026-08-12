@@ -19,7 +19,7 @@ const validate = (t) => (data) => {
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || '';
+  const email = location.state?.email || new URLSearchParams(location.search).get('email') || '';
   const { t } = useTranslation();
   const [token, setToken] = useState('');
   const [errors, setErrors] = useState({});

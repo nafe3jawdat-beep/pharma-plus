@@ -24,11 +24,11 @@ const PRESETS = [7, 30, 90];
 const TOP_MEDS_LIMITS = [5, 10];
 
 const TABS = [
-  { key: "overview", labelKey: "tabOverview", icon: "monitoring" },
-  { key: "medications", labelKey: "tabMedications", icon: "pill" },
-  { key: "inventory", labelKey: "tabInventory", icon: "inventory_2" },
-  { key: "staff", labelKey: "tabStaff", icon: "group" },
-  { key: "ai", labelKey: "tabAiInsights", icon: "auto_awesome" },
+  { key: "overview", labelKey: "Reports.tabOverview", icon: "monitoring" },
+  { key: "medications", labelKey: "Reports.tabMedications", icon: "pill" },
+  { key: "inventory", labelKey: "Reports.tabInventory", icon: "inventory_2" },
+  { key: "staff", labelKey: "Reports.tabStaff", icon: "group" },
+  { key: "ai", labelKey: "Reports.tabAiInsights", icon: "auto_awesome" },
 ];
 
 const fmtMoney = (v) =>
@@ -89,23 +89,23 @@ function StatCard({ label, value, icon, tone = "default" }) {
 
 function KpiStrip({ t, summary, loading, error, onRetry }) {
   const metrics = [
-    { label: t("finance.grossSales"), value: fmtMoney(summary?.gross_sales), icon: "point_of_sale", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: "text-on-surface" },
-    { label: t("finance.netRevenue"), value: fmtMoney(summary?.net_revenue), icon: "payments", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: "text-on-surface" },
-    { label: t("finance.grossProfit"), value: fmtMoney(summary?.gross_profit), icon: "trending_up", tile: "bg-emerald-50 text-emerald-600", valueColor: "text-emerald-600" },
-    { label: t("finance.netProfit"), value: fmtMoney(summary?.net_profit), icon: "savings", tile: "bg-emerald-50 text-emerald-600", valueColor: "text-emerald-600" },
+    { label: t("Reports.grossSales"), value: fmtMoney(summary?.gross_sales), icon: "point_of_sale", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: "text-on-surface" },
+    { label: t("Reports.netRevenue"), value: fmtMoney(summary?.net_revenue), icon: "payments", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: "text-on-surface" },
+    { label: t("Reports.grossProfit"), value: fmtMoney(summary?.gross_profit), icon: "trending_up", tile: "bg-emerald-50 text-emerald-600", valueColor: "text-emerald-600" },
+    { label: t("Reports.netProfit"), value: fmtMoney(summary?.net_profit), icon: "savings", tile: "bg-emerald-50 text-emerald-600", valueColor: "text-emerald-600" },
   ];
 
   if (error && !summary) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-surface-container-high bg-surface-container-lowest py-8 text-center shadow-ambient-sm">
         <span className="material-symbols-outlined text-3xl text-rose-400">error</span>
-        <p className="text-sm font-medium text-on-surface-variant">{t("finance.error")}</p>
+        <p className="text-sm font-medium text-on-surface-variant">{t("Reports.error")}</p>
         <button
           onClick={onRetry}
           className="flex items-center gap-2 rounded-xl bg-surface-container-high px-4 py-2 text-sm font-bold text-on-surface transition-all hover:bg-surface-container"
         >
           <span className="material-symbols-outlined text-lg">refresh</span>
-          {t("finance.retry")}
+          {t("Reports.retry")}
         </button>
       </div>
     );
@@ -145,13 +145,13 @@ function SectionError({ onRetry, t }) {
       <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50">
         <span className="material-symbols-outlined text-3xl text-rose-400">error</span>
       </div>
-      <p className="mb-3 text-sm font-medium text-on-surface-variant">{t("finance.error")}</p>
+      <p className="mb-3 text-sm font-medium text-on-surface-variant">{t("Reports.error")}</p>
       <button
         onClick={onRetry}
         className="flex items-center gap-2 rounded-xl bg-surface-container-high px-4 py-2 text-sm font-bold text-on-surface transition-all hover:bg-surface-container"
       >
         <span className="material-symbols-outlined text-lg">refresh</span>
-        {t("finance.retry")}
+        {t("Reports.retry")}
       </button>
     </div>
   );
@@ -163,7 +163,7 @@ function SectionEmpty({ icon, message, t, children }) {
       <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-container/60">
         <span className="material-symbols-outlined text-3xl text-on-surface-variant/40">{icon}</span>
       </div>
-      <p className="max-w-sm text-sm font-medium text-on-surface-variant">{message || t("finance.noData")}</p>
+      <p className="max-w-sm text-sm font-medium text-on-surface-variant">{message || t("Reports.noData")}</p>
       {children}
     </div>
   );
@@ -173,7 +173,7 @@ function SectionLoading({ t }) {
   return (
     <div className="flex items-center justify-center py-10">
       <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      <span className="ml-3 text-sm text-on-surface-variant">{t("finance.loading")}</span>
+      <span className="ml-3 text-sm text-on-surface-variant">{t("Reports.loading")}</span>
     </div>
   );
 }
@@ -193,7 +193,7 @@ function Td({ children, align = "start", className = "" }) {
 }
 
 function DataTable({ headers, rows, t }) {
-  if (!rows || rows.length === 0) return <SectionEmpty icon="table_rows" message={t("finance.noData")} t={t} />;
+  if (!rows || rows.length === 0) return <SectionEmpty icon="table_rows" message={t("Reports.noData")} t={t} />;
   return (
     <div className="overflow-x-auto rounded-xl border border-surface-container-high">
       <table className="w-full text-sm">
@@ -238,7 +238,7 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
       className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 text-sm font-bold text-on-primary shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
     >
       <span className="material-symbols-outlined text-lg">auto_awesome</span>
-      {t("finance.generateAiReport")}
+      {t("Reports.generateAiReport")}
     </button>
   );
   const refreshBtn = (
@@ -247,16 +247,16 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
       className="flex items-center gap-2 rounded-xl bg-surface-container-high px-4 py-2 text-sm font-bold text-on-surface transition-all hover:bg-surface-container"
     >
       <span className="material-symbols-outlined text-lg">refresh</span>
-      {t("finance.refresh")}
+      {t("Reports.refresh")}
     </button>
   );
 
   if (ai.status === "loading") {
     return (
-      <SectionCard icon="auto_awesome" title={t("finance.aiInsights")}>
+      <SectionCard icon="auto_awesome" title={t("Reports.aiInsights")}>
         <div className="flex items-center justify-center py-10">
           <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span className="ml-3 text-sm text-on-surface-variant">{t("finance.generating")}</span>
+          <span className="ml-3 text-sm text-on-surface-variant">{t("Reports.generating")}</span>
         </div>
       </SectionCard>
     );
@@ -264,8 +264,8 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
 
   if (ai.status === "pending") {
     return (
-      <SectionCard icon="auto_awesome" title={t("finance.aiInsights")} actions={refreshBtn}>
-        <SectionEmpty icon="hourglass_top" message={t("finance.generationPending")} t={t}>
+      <SectionCard icon="auto_awesome" title={t("Reports.aiInsights")} actions={refreshBtn}>
+        <SectionEmpty icon="hourglass_top" message={t("Reports.generationPending")} t={t}>
           <div className="mt-4">{refreshBtn}</div>
         </SectionEmpty>
       </SectionCard>
@@ -274,7 +274,7 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
 
   if (ai.status === "error") {
     return (
-      <SectionCard icon="auto_awesome" title={t("finance.aiInsights")}>
+      <SectionCard icon="auto_awesome" title={t("Reports.aiInsights")}>
         <SectionError onRetry={onRefresh} t={t} />
       </SectionCard>
     );
@@ -282,12 +282,12 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
 
   if (ai.status !== "ready") {
     return (
-      <SectionCard icon="auto_awesome" title={t("finance.aiInsights")}>
+      <SectionCard icon="auto_awesome" title={t("Reports.aiInsights")}>
         <div className="flex flex-col items-center justify-center py-10 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dim shadow-md shadow-primary/15">
             <span className="material-symbols-outlined text-on-primary text-3xl">auto_awesome</span>
           </div>
-          <p className="mb-5 max-w-md text-sm text-on-surface-variant">{t("finance.aiInsightsPrompt")}</p>
+          <p className="mb-5 max-w-md text-sm text-on-surface-variant">{t("Reports.aiInsightsPrompt")}</p>
           {generateBtn}
         </div>
       </SectionCard>
@@ -295,11 +295,11 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
   }
 
   return (
-    <SectionCard icon="auto_awesome" title={t("finance.aiInsights")} actions={generateBtn}>
+    <SectionCard icon="auto_awesome" title={t("Reports.aiInsights")} actions={generateBtn}>
       <div className="space-y-6">
         {insights.financial_health_score != null && insights.financial_health_score !== "" && (
           <div className="flex flex-col justify-between gap-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 to-primary-dim/5 p-4 sm:flex-row sm:items-center">
-            <p className="text-sm font-bold text-on-surface">{t("finance.financialHealthScore")}</p>
+            <p className="text-sm font-bold text-on-surface">{t("Reports.financialHealthScore")}</p>
             <span className={`w-fit rounded-xl px-3.5 py-1.5 text-sm font-bold tabular-nums ${AI_TONES[scoreLabel(insights.financial_health_score)]}`}>
               {insights.financial_health_score}
             </span>
@@ -310,7 +310,7 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
           <div>
             <h3 className="mb-2 flex items-center gap-2 text-sm font-bold text-on-surface">
               <span className="material-symbols-outlined text-lg text-primary">summarize</span>
-              {t("finance.executiveSummary")}
+              {t("Reports.executiveSummary")}
             </h3>
             <p className="text-sm leading-relaxed text-on-surface-variant">{insights.executive_summary}</p>
           </div>
@@ -320,7 +320,7 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
           <div>
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-on-surface">
               <span className="material-symbols-outlined text-lg text-primary">lightbulb</span>
-              {t("finance.keyFindings")}
+              {t("Reports.keyFindings")}
             </h3>
             <ul className="space-y-2">
               {keyFindings.map((f, i) => (
@@ -337,7 +337,7 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
           <div>
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-on-surface">
               <span className="material-symbols-outlined text-lg text-primary">thumb_up</span>
-              {t("finance.recommendations")}
+              {t("Reports.recommendations")}
             </h3>
             <ul className="space-y-2">
               {recommendations.map((r, i) => (
@@ -354,7 +354,7 @@ function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
           <div>
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-on-surface">
               <span className="material-symbols-outlined text-lg text-rose-400">warning</span>
-              {t("finance.inventoryRiskAlerts")}
+              {t("Reports.inventoryRiskAlerts")}
             </h3>
             <ul className="space-y-2">
               {riskAlerts.map((r, i) => (
@@ -516,10 +516,10 @@ export default function FinancePage() {
     setFilters((f) => ({ ...f, start_date: `${s}T00:00:00Z`, end_date: `${e}T23:59:59Z` }));
   };
 
-  const applyRange = () => {
+  const applyRange = (start, end) => {
     setTopMeds(null);
     setAi({ status: "idle", data: null, loading: false });
-    setFilters((f) => ({ ...f, start_date: `${startDate}T00:00:00Z`, end_date: `${endDate}T23:59:59Z` }));
+    setFilters((f) => ({ ...f, start_date: `${start}T00:00:00Z`, end_date: `${end}T23:59:59Z` }));
   };
 
   const setFilter = (patch) => setFilters((f) => ({ ...f, ...patch }));
@@ -539,17 +539,17 @@ export default function FinancePage() {
 
   const breakdownData = Array.isArray(summary?.expense_breakdown)
     ? summary.expense_breakdown.map((e) => ({
-        name: t(`finance.expense_${e.category}`, { defaultValue: e.category }),
+        name: t(`Reports.expense_${e.category}`, { defaultValue: e.category }),
         value: Number(e.total ?? 0),
       }))
     : Object.entries(summary?.expense_breakdown ?? {}).map(([k, v]) => ({
-        name: t(`finance.expense_${k}`, { defaultValue: k }),
+        name: t(`Reports.expense_${k}`, { defaultValue: k }),
         value: Number(v ?? 0),
       }));
 
   const LOSS_KEY_MAP = { damaged_cost: "damages", expenses: "expenses", salaries: "salaries" };
   const operationalLosses = Object.entries(summary?.operational_losses ?? {}).map(([k, v]) => ({
-    name: t(`finance.loss_${LOSS_KEY_MAP[k] ?? k}`, { defaultValue: k }),
+    name: t(`Reports.loss_${LOSS_KEY_MAP[k] ?? k}`, { defaultValue: k }),
     value: Number(v ?? 0),
   }));
 
@@ -577,7 +577,7 @@ export default function FinancePage() {
           cells: [
             { content: rank },
             { content: <span className="font-bold text-on-surface">{d.group_key}</span> },
-            { content: <span className="rounded-lg bg-primary-container/40 px-2.5 py-1 text-xs font-bold capitalize text-primary">{t(`finance.${d.group_type}`)}</span> },
+            { content: <span className="rounded-lg bg-primary-container/40 px-2.5 py-1 text-xs font-bold capitalize text-primary">{t(`Reports.${d.group_type}`)}</span> },
             { content: <span className="tabular-nums">{Number(d.search_count).toLocaleString()}</span>, align: "end" },
             { content: <span className="tabular-nums">{d.radius_km}</span>, align: "end" },
           ],
@@ -594,17 +594,17 @@ export default function FinancePage() {
   });
   const demandHeaders = demandGrouped
     ? [
-        { label: t("finance.rank") },
-        { label: t("finance.groupKey") },
-        { label: t("finance.groupType") },
-        { label: t("finance.searchCount"), align: "end" },
-        { label: t("finance.radiusKm"), align: "end" },
+        { label: t("Reports.rank") },
+        { label: t("Reports.groupKey") },
+        { label: t("Reports.groupType") },
+        { label: t("Reports.searchCount"), align: "end" },
+        { label: t("Reports.radiusKm"), align: "end" },
       ]
     : [
-        { label: t("finance.rank") },
-        { label: t("finance.medication") },
-        { label: t("finance.region") },
-        { label: t("finance.searchCount"), align: "end" },
+        { label: t("Reports.rank") },
+        { label: t("Reports.medication") },
+        { label: t("Reports.region") },
+        { label: t("Reports.searchCount"), align: "end" },
       ];
 
   const expiredRows = (expiring?.expired?.items ?? expiring?.expired_batches ?? []).map((b, i) => ({
@@ -628,7 +628,7 @@ export default function FinancePage() {
         { content: <span className="tabular-nums">{fmtDate(b.expiration_date)}</span>, align: "end" },
         { content: daysLeft != null ? (
           <span className={`rounded-lg px-2 py-0.5 text-xs font-bold tabular-nums ${daysLeft <= 15 ? "bg-rose-100 text-rose-600" : "bg-amber-100 text-amber-600"}`}>
-            {daysLeft} {t("finance.days")}
+            {daysLeft} {t("Reports.days")}
           </span>
         ) : <span className="text-on-surface-variant">-</span>, align: "end" },
         { content: <span className="tabular-nums">{Number(b.quantity).toLocaleString()}</span>, align: "end" },
@@ -645,11 +645,11 @@ export default function FinancePage() {
       { content: <span className="font-mono text-xs text-on-surface-variant">{it.batch_id || "-"}</span> },
       { content: <span className="tabular-nums">{Number(it.stock ?? it.stock_quantity).toLocaleString()}</span>, align: "end" },
       { content: it.never_sold ? (
-        <span className="font-semibold text-rose-500">{t("finance.neverSold")}</span>
+        <span className="font-semibold text-rose-500">{t("Reports.neverSold")}</span>
       ) : (
         <span className="tabular-nums">{it.last_sold_at != null ? fmtDate(it.last_sold_at) : it.last_sale_date ? fmtDate(it.last_sale_date) : "-"}</span>
       ), align: "end" },
-      { content: <span className="tabular-nums">{it.days_since_last_sale != null ? `${it.days_since_last_sale} ${t("finance.days")}` : it.days_without_sale != null ? `${it.days_without_sale} ${t("finance.days")}` : "-"}</span>, align: "end" },
+      { content: <span className="tabular-nums">{it.days_since_last_sale != null ? `${it.days_since_last_sale} ${t("Reports.days")}` : it.days_without_sale != null ? `${it.days_without_sale} ${t("Reports.days")}` : "-"}</span>, align: "end" },
       { content: <span className="font-bold tabular-nums text-on-surface">{fmtMoney(it.stock_value)}</span>, align: "end" },
     ],
   }));
@@ -728,8 +728,8 @@ export default function FinancePage() {
               <span className="material-symbols-outlined text-on-primary text-2xl">savings</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-on-surface">{t("finance.title")}</h1>
-              <p className="mt-0.5 text-sm text-on-surface-variant">{t("finance.subtitle")}</p>
+              <h1 className="text-2xl font-bold tracking-tight text-on-surface">{t("Reports.title")}</h1>
+              <p className="mt-0.5 text-sm text-on-surface-variant">{t("Reports.subtitle")}</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -749,7 +749,7 @@ export default function FinancePage() {
         <div className="rounded-2xl border border-surface-container-high bg-surface-container-lowest p-4 shadow-ambient-sm sm:p-5">
           <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
             <div className="flex flex-col gap-2">
-              <span className={labelCls}>{t("finance.period")}</span>
+              <span className={labelCls}>{t("Reports.period")}</span>
               <div className="flex gap-1 rounded-xl bg-surface-container/70 p-1">
                 {PRESETS.map((d) => (
                   <button
@@ -757,32 +757,25 @@ export default function FinancePage() {
                     onClick={() => applyPreset(d)}
                     className={`rounded-lg px-3.5 py-1.5 text-sm font-bold transition-all ${preset === d ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
                   >
-                    {t(`finance.last${d}Days`)}
+                    {t(`Reports.last${d}Days`)}
                   </button>
                 ))}
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <span className={labelCls}>{t("finance.startDate")}</span>
+              <span className={labelCls}>{t("Reports.startDate")}</span>
               <div className="relative">
                 <span className="material-symbols-outlined pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">calendar_today</span>
-                <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPreset(null); }} className={`${selectCls} ps-10`} />
+                <input type="date" value={startDate} onChange={(e) => { const v = e.target.value; setStartDate(v); setPreset(null); if (v && endDate) applyRange(v, endDate); }} className={`${selectCls} ps-10`} />
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <span className={labelCls}>{t("finance.endDate")}</span>
+              <span className={labelCls}>{t("Reports.endDate")}</span>
               <div className="relative">
                 <span className="material-symbols-outlined pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">calendar_today</span>
-                <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPreset(null); }} className={`${selectCls} ps-10`} />
+                <input type="date" value={endDate} onChange={(e) => { const v = e.target.value; setEndDate(v); setPreset(null); if (v && startDate) applyRange(startDate, v); }} className={`${selectCls} ps-10`} />
               </div>
             </div>
-            <button
-              onClick={applyRange}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dim px-5 py-2.5 text-sm font-bold text-on-primary shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <span className="material-symbols-outlined text-lg">refresh</span>
-              {t("finance.apply")}
-            </button>
           </div>
         </div>
 
@@ -812,15 +805,15 @@ export default function FinancePage() {
           {activeTab === "overview" && (
             <>
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <StatCard label={t("finance.cogs")} value={fmtMoney(summary?.net_cogs ?? summary?.cogs)} icon="inventory_2" />
-                <StatCard label={t("finance.returns")} value={fmtMoney(summary?.returns_amount ?? summary?.returns)} icon="replay" tone="orange" />
-                <StatCard label={t("finance.operationalLosses")} value={fmtMoney(totalOperationalLosses)} icon="receipt_long" tone="red" />
-                <StatCard label={t("finance.expiredOnHandLoss")} value={fmtMoney(summary?.expired_inventory_loss?.value ?? summary?.expired_on_hand_loss)} icon="history_toggle_off" tone="red" />
+                <StatCard label={t("Reports.cogs")} value={fmtMoney(summary?.net_cogs ?? summary?.cogs)} icon="inventory_2" />
+                <StatCard label={t("Reports.returns")} value={fmtMoney(summary?.returns_amount ?? summary?.returns)} icon="replay" tone="orange" />
+                <StatCard label={t("Reports.operationalLosses")} value={fmtMoney(totalOperationalLosses)} icon="receipt_long" tone="red" />
+                <StatCard label={t("Reports.expiredOnHandLoss")} value={fmtMoney(summary?.expired_inventory_loss?.value ?? summary?.expired_on_hand_loss)} icon="history_toggle_off" tone="red" />
               </div>
 
               <SectionCard
                 icon="monitoring"
-                title={t("finance.summary")}
+                title={t("Reports.summary")}
                 subtitle={summary?.period ? `${fmtDate(summary.period.start_date)} — ${fmtDate(summary.period.end_date)}` : undefined}
               >
                 {summaryError && !summary ? (
@@ -832,7 +825,7 @@ export default function FinancePage() {
                 ) : (
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div>
-                      <h3 className="mb-3 text-sm font-bold text-on-surface">{t("finance.expenseBreakdown")}</h3>
+                      <h3 className="mb-3 text-sm font-bold text-on-surface">{t("Reports.expenseBreakdown")}</h3>
                       {breakdownData.length ? (
                         <div className="h-60">
                           <ResponsiveContainer width="100%" height="100%">
@@ -856,7 +849,7 @@ export default function FinancePage() {
                       )}
                     </div>
                     <div>
-                      <h3 className="mb-3 text-sm font-bold text-on-surface">{t("finance.operationalLosses")}</h3>
+                      <h3 className="mb-3 text-sm font-bold text-on-surface">{t("Reports.operationalLosses")}</h3>
                       {operationalLosses.length ? (
                         <div className="space-y-4">
                           {operationalLosses.map((l) => (
@@ -874,7 +867,7 @@ export default function FinancePage() {
                             </div>
                           ))}
                           <div className="flex items-center justify-between rounded-xl bg-rose-50 px-4 py-3">
-                            <span className="text-sm font-bold text-rose-600">{t("finance.total")}</span>
+                            <span className="text-sm font-bold text-rose-600">{t("Reports.total")}</span>
                             <span className="font-bold tabular-nums text-rose-600">{fmtMoney(totalOperationalLosses)}</span>
                           </div>
                         </div>
@@ -892,12 +885,12 @@ export default function FinancePage() {
             <>
               <SectionCard
                 icon="pill"
-                title={t("finance.mostRequested")}
-                subtitle={topMeds ? undefined : t("finance.topMedsPrompt")}
+                title={t("Reports.mostRequested")}
+                subtitle={topMeds ? undefined : t("Reports.topMedsPrompt")}
                 actions={
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-2">
-                      <span className={labelCls}>{t("finance.limit")}</span>
+                      <span className={labelCls}>{t("Reports.limit")}</span>
                       <select className={selectCls} value={filters.topMedsLimit} onChange={(e) => { setFilter({ topMedsLimit: Number(e.target.value) }); setTopMeds(null); }}>
                         {TOP_MEDS_LIMITS.map((l) => <option key={l} value={l}>{l}</option>)}
                       </select>
@@ -908,7 +901,7 @@ export default function FinancePage() {
                       className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-on-primary transition-all hover:opacity-90 disabled:opacity-50"
                     >
                       <span className="material-symbols-outlined text-lg">{topMedsLoading ? "hourglass_top" : "trending_up"}</span>
-                      {t("finance.mostRequested")}
+                      {t("Reports.mostRequested")}
                     </button>
                   </div>
                 }
@@ -918,24 +911,24 @@ export default function FinancePage() {
                 ) : topMedsError ? (
                   <SectionError onRetry={() => loadTopMeds()} t={t} />
                 ) : !topMeds ? (
-                  <SectionEmpty icon="table_rows" message={t("finance.topMedsPrompt")} t={t} />
+                  <SectionEmpty icon="table_rows" message={t("Reports.topMedsPrompt")} t={t} />
                 ) : (
                   <DataTable
                     t={t}
                     headers={[
-                      { label: t("finance.rank") },
-                      { label: t("finance.medication") },
-                      { label: t("finance.qtySold"), align: "end" },
-                      { label: t("finance.unitPrice"), align: "end" },
-                      { label: t("finance.unitCost"), align: "end" },
-                      { label: t("finance.profit"), align: "end" },
+                      { label: t("Reports.rank") },
+                      { label: t("Reports.medication") },
+                      { label: t("Reports.qtySold"), align: "end" },
+                      { label: t("Reports.unitPrice"), align: "end" },
+                      { label: t("Reports.unitCost"), align: "end" },
+                      { label: t("Reports.profit"), align: "end" },
                     ]}
                     rows={topMedsRows}
                   />
                 )}
               </SectionCard>
 
-              <SectionCard icon="radar" title={t("finance.demand")} subtitle={t("finance.demandSubtitle")}>
+              <SectionCard icon="radar" title={t("Reports.demand")} subtitle={t("Reports.demandSubtitle")}>
                 {demandError ? (
                   <SectionError onRetry={() => fetchAll()} t={t} />
                 ) : loading && !demand.length ? (
@@ -951,13 +944,13 @@ export default function FinancePage() {
             <>
               <SectionCard
                 icon="inventory_2"
-                title={t("finance.expiringInventory")}
-                subtitle={expiring ? `${t("finance.totalExpiredLoss")}: ${fmtMoney(expiring.expired?.total_loss_value ?? expiring.total_expired_loss)} · ${t("finance.totalNearingExpiryValue")}: ${fmtMoney(expiring.nearing_expiry?.total_stock_value ?? expiring.total_nearing_expiry_value)}` : undefined}
+                title={t("Reports.expiringInventory")}
+                subtitle={expiring ? `${t("Reports.totalExpiredLoss")}: ${fmtMoney(expiring.expired?.total_loss_value ?? expiring.total_expired_loss)} · ${t("Reports.totalNearingExpiryValue")}: ${fmtMoney(expiring.nearing_expiry?.total_stock_value ?? expiring.total_nearing_expiry_value)}` : undefined}
                 actions={
                   <div className="flex items-center gap-2">
-                    <span className={labelCls}>{t("finance.alertWindow")}</span>
+                    <span className={labelCls}>{t("Reports.alertWindow")}</span>
                     <select className={selectCls} value={filters.days} onChange={(e) => setFilter({ days: Number(e.target.value) })}>
-                      {[7, 15, 30, 60, 90, 180, 365].map((d) => <option key={d} value={d}>{d} {t("finance.days")}</option>)}
+                      {[7, 15, 30, 60, 90, 180, 365].map((d) => <option key={d} value={d}>{d} {t("Reports.days")}</option>)}
                     </select>
                   </div>
                 }
@@ -973,16 +966,16 @@ export default function FinancePage() {
                     <div>
                       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-on-surface">
                         <span className="material-symbols-outlined text-lg text-rose-400">close</span>
-                        {t("finance.expiredBatches")}
+                        {t("Reports.expiredBatches")}
                       </h3>
                       <DataTable
                         t={t}
                         headers={[
-                          { label: t("finance.batch") },
-                          { label: t("finance.medication") },
-                          { label: t("finance.expirationDate"), align: "end" },
-                          { label: t("finance.quantity"), align: "end" },
-                          { label: t("finance.lossValue"), align: "end" },
+                          { label: t("Reports.batch") },
+                          { label: t("Reports.medication") },
+                          { label: t("Reports.expirationDate"), align: "end" },
+                          { label: t("Reports.quantity"), align: "end" },
+                          { label: t("Reports.lossValue"), align: "end" },
                         ]}
                         rows={expiredRows}
                       />
@@ -990,17 +983,17 @@ export default function FinancePage() {
                     <div>
                       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-on-surface">
                         <span className="material-symbols-outlined text-lg text-amber-500">schedule</span>
-                        {t("finance.nearingExpiry")}
+                        {t("Reports.nearingExpiry")}
                       </h3>
                       <DataTable
                         t={t}
                         headers={[
-                          { label: t("finance.batch") },
-                          { label: t("finance.medication") },
-                          { label: t("finance.expirationDate"), align: "end" },
-                          { label: t("finance.daysUntilExpiry"), align: "end" },
-                          { label: t("finance.quantity"), align: "end" },
-                          { label: t("finance.stockValue"), align: "end" },
+                          { label: t("Reports.batch") },
+                          { label: t("Reports.medication") },
+                          { label: t("Reports.expirationDate"), align: "end" },
+                          { label: t("Reports.daysUntilExpiry"), align: "end" },
+                          { label: t("Reports.quantity"), align: "end" },
+                          { label: t("Reports.stockValue"), align: "end" },
                         ]}
                         rows={nearingRows}
                       />
@@ -1009,7 +1002,7 @@ export default function FinancePage() {
                 )}
               </SectionCard>
 
-              <SectionCard icon="hourglass_bottom" title={t("finance.slowMoving")} subtitle={t("finance.slowMovingSubtitle")}>
+              <SectionCard icon="hourglass_bottom" title={t("Reports.slowMoving")} subtitle={t("Reports.slowMovingSubtitle")}>
                 {slowMovingError ? (
                   <SectionError onRetry={() => fetchAll()} t={t} />
                 ) : loading && !slowMoving.length ? (
@@ -1018,13 +1011,13 @@ export default function FinancePage() {
                   <DataTable
                     t={t}
                     headers={[
-                      { label: t("finance.inventoryItem") },
-                      { label: t("finance.medication") },
-                      { label: t("finance.batch") },
-                      { label: t("finance.stockQuantity"), align: "end" },
-                      { label: t("finance.lastSaleDate"), align: "end" },
-                      { label: t("finance.daysWithoutSale"), align: "end" },
-                      { label: t("finance.stockValue"), align: "end" },
+                      { label: t("Reports.inventoryItem") },
+                      { label: t("Reports.medication") },
+                      { label: t("Reports.batch") },
+                      { label: t("Reports.stockQuantity"), align: "end" },
+                      { label: t("Reports.lastSaleDate"), align: "end" },
+                      { label: t("Reports.daysWithoutSale"), align: "end" },
+                      { label: t("Reports.stockValue"), align: "end" },
                     ]}
                     rows={slowMovingRows}
                   />
@@ -1036,8 +1029,8 @@ export default function FinancePage() {
           {activeTab === "staff" && (
             <SectionCard
               icon="group"
-              title={t("finance.employeeList")}
-              subtitle={t("finance.staffPerformanceSubtitle")}
+              title={t("Reports.employeeList")}
+              subtitle={t("Reports.staffPerformanceSubtitle")}
               actions={
                 <div className="relative w-full sm:w-72">
                   <span className="material-symbols-outlined pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">search</span>
@@ -1045,7 +1038,7 @@ export default function FinancePage() {
                     type="text"
                     value={staffSearch}
                     onChange={(e) => setStaffSearch(e.target.value)}
-                    placeholder={t("finance.searchEmployeeName")}
+                    placeholder={t("Reports.searchEmployeeName")}
                     className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest ps-10 pe-3 py-2.5 text-sm text-on-surface outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-primary focus:ring-2 focus:ring-primary-container/60"
                   />
                 </div>
@@ -1058,7 +1051,7 @@ export default function FinancePage() {
               ) : mergedEmployees.length === 0 ? (
                 <SectionEmpty icon="group" message={t("employees.noEmployees")} t={t} />
               ) : filteredStaff.length === 0 ? (
-                <SectionEmpty icon="search_off" message={t("finance.noEmployeesMatch")} t={t} />
+                <SectionEmpty icon="search_off" message={t("Reports.noEmployeesMatch")} t={t} />
               ) : (
                 <DataTable
                   t={t}
@@ -1066,11 +1059,11 @@ export default function FinancePage() {
                     { label: t("employees.name") },
                     { label: t("employees.email") },
                     { label: t("employees.salary"), align: "end" },
-                    { label: t("finance.totalOrders"), align: "end" },
-                    { label: t("finance.totalSalesVolume"), align: "end" },
-                    { label: t("finance.avgOrderValue"), align: "end" },
-                    { label: t("finance.returnsCount"), align: "end" },
-                    { label: t("finance.returnRate"), align: "end" },
+                    { label: t("Reports.totalOrders"), align: "end" },
+                    { label: t("Reports.totalSalesVolume"), align: "end" },
+                    { label: t("Reports.avgOrderValue"), align: "end" },
+                    { label: t("Reports.returnsCount"), align: "end" },
+                    { label: t("Reports.returnRate"), align: "end" },
                   ]}
                   rows={staffRows}
                 />
