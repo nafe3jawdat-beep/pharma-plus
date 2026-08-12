@@ -362,7 +362,7 @@ export default function DashboardContent() {
               </div>
               {stats?.low_stock_count > 0 && (
                 <div
-                  // onClick={() => navigate('/Dashboard/StockManagement', { state: { lowStock: true } })}
+                  onClick={() => navigate('/Dashboard/StockManagement', { state: { lowStock: true } })}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 cursor-pointer hover:bg-red-100 hover:-translate-y-0.5 transition-all"
                 >
                   <span className="material-symbols-outlined text-red-500 text-sm">warning</span>
