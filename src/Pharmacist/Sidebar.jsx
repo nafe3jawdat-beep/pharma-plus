@@ -161,6 +161,10 @@ export default function Sidebar({ pharmacies, selectedPharmacy, setSelectedPharm
               <span className="material-symbols-outlined">payments</span>
               {t("nav.salaries")}
             </NavLink>
+            <NavLink to="/Dashboard/Expenses" className={linkClass}>
+              <span className="material-symbols-outlined">account_balance_wallet</span>
+              {t("nav.expenses")}
+            </NavLink>
             <NavLink to="/Dashboard/Finance" className={linkClass}>
               <span className="material-symbols-outlined">account_balance</span>
               {t("nav.Reports")}
