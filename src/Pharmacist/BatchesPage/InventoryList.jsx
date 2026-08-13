@@ -106,7 +106,14 @@ export default function InventoryList({
                     return (
                       <tr key={batch.id} className="hover:bg-surface-container/30 transition-colors">
                         <td className="px-5 py-4">
-                          <span className="font-mono text-xs font-bold text-on-surface">{batch.batch_number}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-on-surface">{batch.batch_number}</span>
+                            {batch.pending && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 whitespace-nowrap">
+                                {t("batches.pending")}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-4 text-end">
                           <span className={`font-bold tabular-nums ${batch.quantity <= 0 ? 'text-rose-500' : 'text-on-surface'}`}>{batch.quantity}</span>
@@ -123,14 +130,19 @@ export default function InventoryList({
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => openEditModal(batch)} className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all" title={t("app.edit")}>
+                            <button
+                              onClick={() => openEditModal(batch)}
+                              disabled={batch.pending}
+                              className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                              title={batch.pending ? t("batches.pending") : t("app.edit")}
+                            >
                               <span className="material-symbols-outlined text-lg">edit</span>
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(batch)}
-                              disabled={batch.quantity > 0}
+                              disabled={batch.pending || batch.quantity > 0}
                               className="p-1.5 rounded-lg hover:bg-rose-50 text-on-surface-variant hover:text-rose-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                              title={batch.quantity > 0 ? t("batches.cannotDelete") : t("app.delete")}
+                              title={batch.pending || batch.quantity > 0 ? t("batches.cannotDelete") : t("app.delete")}
                             >
                               <span className="material-symbols-outlined text-lg">delete</span>
                             </button>

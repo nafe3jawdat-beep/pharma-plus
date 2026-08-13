@@ -152,3 +152,20 @@ export async function getCachedEmployees(pharmacyId) {
     return [];
   }
 }
+
+export async function cacheBatches(pharmacyId, itemId, data) {
+  await db.batchCache.put({
+    key: `${pharmacyId}:${itemId}`,
+    data,
+    cachedAt: new Date().toISOString(),
+  });
+}
+
+export async function getCachedBatches(pharmacyId, itemId) {
+  try {
+    const record = await db.batchCache.get(`${pharmacyId}:${itemId}`);
+    return record?.data ?? [];
+  } catch {
+    return [];
+  }
+}

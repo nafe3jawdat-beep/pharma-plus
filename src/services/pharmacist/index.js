@@ -17,5 +17,5 @@ export { salaryService } from "./salary.service";
 export { expenseService } from "./expense.service";
 export { reportsApi } from "./reports.service";
 export { pharmacyMedicationApi } from "./pharmacyMedication.service";
-export { lookupByBarcode, enqueuePosAction, recordOfflineSale, cacheInventory, getCachedInventory, getOldestCacheTime, cacheDashboard, getCachedDashboard, cacheEmployees, getCachedEmployees } from "./offlineService";
+export { lookupByBarcode, enqueuePosAction, recordOfflineSale, cacheInventory, getCachedInventory, getOldestCacheTime, cacheDashboard, getCachedDashboard, cacheEmployees, getCachedEmployees, cacheBatches, getCachedBatches } from "./offlineService";
 export { processSyncQueue, startSyncEngine, stopSyncEngine } from "./syncEngine";

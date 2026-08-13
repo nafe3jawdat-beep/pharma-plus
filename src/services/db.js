@@ -12,3 +12,7 @@ db.version(2).stores({
   dashboardCache: 'pharmacyId',
   employeeCache: 'pharmacyId',
 });
+
+db.version(3).stores({
+  batchCache: 'key',
+});

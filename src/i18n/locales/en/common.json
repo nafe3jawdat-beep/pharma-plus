@@ -1350,6 +1350,8 @@
     "batchCreated": "Batch created successfully",
     "batchUpdated": "Batch updated successfully",
     "batchDeleted": "Batch deleted successfully",
+    "offlineQueued": "Saved offline — will sync when you're back online",
+    "pending": "Pending sync",
     "createFailed": "Failed to create batch",
     "updateFailed": "Failed to update batch",
     "deleteFailed": "Failed to delete batch",

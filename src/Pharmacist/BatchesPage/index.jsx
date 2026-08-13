@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { stockApi, batchApi } from '../../services/pharmacist';
+import { stockApi, batchApi, cacheInventory, getCachedInventory, cacheBatches, getCachedBatches } from '../../services/pharmacist';
 import toast from 'react-hot-toast';
 import BatchModal from './BatchModal';
 import BatchSummaryCard from './BatchSummaryCard';
@@ -44,11 +44,20 @@ export default function BatchesPage() {
         setInventory(prev => [...prev, ...items]);
       } else {
         setInventory(items);
+        cacheInventory(items, pharmacyId).catch(() => {});
       }
       const meta = res?.meta;
       setHasMore(meta ? meta.current_page < meta.last_page : items.length === 50);
     } catch {
-      if (!append) setInventory([]);
+      if (!append) {
+        const cached = await getCachedInventory(pharmacyId);
+        if (cached.length > 0) {
+          setInventory(cached.map((c) => c.raw));
+          setHasMore(false);
+        } else {
+          setInventory([]);
+        }
+      }
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -62,8 +71,11 @@ export default function BatchesPage() {
       const res = await batchApi.list(pharmacyId, itemId);
       setBatches(res?.data ?? []);
       setBatchMeta(res?.meta ?? null);
+      cacheBatches(pharmacyId, itemId, res?.data ?? []).catch(() => {});
     } catch {
-      setBatches([]);
+      const cached = await getCachedBatches(pharmacyId, itemId);
+      setBatches(cached);
+      setBatchMeta(null);
     } finally {
       setIsLoadingBatches(false);
     }
@@ -99,55 +111,88 @@ export default function BatchesPage() {
     if (!pharmacyId || !selectedItem) return;
     setSubmitting(true);
     try {
-      await batchApi.create(pharmacyId, selectedItem.id, {
+      const payload = {
         quantity: parseInt(createForm.quantity, 10),
         wholesale_price: parseFloat(createForm.wholesale_price),
         expiration_date: createForm.expiration_date,
-      });
-      toast.success(t("batches.batchCreated"));
+      };
+      const result = await batchApi.create(pharmacyId, selectedItem.id, payload);
+      if (result?.queued) {
+        toast.success(t("batches.offlineQueued"));
+        const optimistic = {
+          id: `local-${Date.now()}`,
+          batch_number: "—",
+          quantity: payload.quantity,
+          wholesale_price: payload.wholesale_price,
+          expiration_date: payload.expiration_date,
+          pending: true,
+        };
+        const next = [optimistic, ...batches];
+        setBatches(next);
+        cacheBatches(pharmacyId, selectedItem.id, next).catch(() => {});
+      } else {
+        toast.success(t("batches.batchCreated"));
+        fetchBatches(selectedItem.id);
+      }
       setShowCreateModal(false);
       setCreateForm({ quantity: '', wholesale_price: '', expiration_date: '' });
-      fetchBatches(selectedItem.id);
     } catch (err) {
       toast.error(err?.response?.data?.message || t("batches.createFailed"));
     } finally {
       setSubmitting(false);
     }
-  }, [pharmacyId, selectedItem, createForm, t, fetchBatches]);
+  }, [pharmacyId, selectedItem, createForm, batches, t, fetchBatches]);
 
   const handleEdit = useCallback(async (e) => {
     e.preventDefault();
     if (!pharmacyId || !selectedItem || !editingBatch) return;
     setSubmitting(true);
     try {
-      await batchApi.update(pharmacyId, selectedItem.id, editingBatch.id, {
+      const payload = {
         quantity: parseInt(editForm.quantity, 10),
         wholesale_price: parseFloat(editForm.wholesale_price),
         expiration_date: editForm.expiration_date,
-      });
-      toast.success(t("batches.batchUpdated"));
+      };
+      const result = await batchApi.update(pharmacyId, selectedItem.id, editingBatch.id, payload);
+      if (result?.queued) {
+        toast.success(t("batches.offlineQueued"));
+        const next = batches.map((b) =>
+          b.id === editingBatch.id ? { ...b, quantity: payload.quantity, wholesale_price: payload.wholesale_price, expiration_date: payload.expiration_date } : b
+        );
+        setBatches(next);
+        cacheBatches(pharmacyId, selectedItem.id, next).catch(() => {});
+      } else {
+        toast.success(t("batches.batchUpdated"));
+        fetchBatches(selectedItem.id);
+      }
       setShowEditModal(false);
       setEditingBatch(null);
       setEditForm({ quantity: '', wholesale_price: '', expiration_date: '' });
-      fetchBatches(selectedItem.id);
     } catch (err) {
       toast.error(err?.response?.data?.message || t("batches.updateFailed"));
     } finally {
       setSubmitting(false);
     }
-  }, [pharmacyId, selectedItem, editingBatch, editForm, t, fetchBatches]);
+  }, [pharmacyId, selectedItem, editingBatch, editForm, batches, t, fetchBatches]);
 
   const handleDelete = useCallback(async (batch) => {
     if (!pharmacyId || !selectedItem) return;
     try {
-      await batchApi.delete(pharmacyId, selectedItem.id, batch.id);
-      toast.success(t("batches.batchDeleted"));
+      const result = await batchApi.delete(pharmacyId, selectedItem.id, batch.id);
+      if (result?.queued) {
+        toast.success(t("batches.offlineQueued"));
+        const next = batches.filter((b) => b.id !== batch.id);
+        setBatches(next);
+        cacheBatches(pharmacyId, selectedItem.id, next).catch(() => {});
+      } else {
+        toast.success(t("batches.batchDeleted"));
+        fetchBatches(selectedItem.id);
+      }
       setDeleteConfirm(null);
-      fetchBatches(selectedItem.id);
     } catch (err) {
       toast.error(err?.response?.data?.message || t("batches.deleteFailed"));
     }
-  }, [pharmacyId, selectedItem, t, fetchBatches]);
+  }, [pharmacyId, selectedItem, batches, t, fetchBatches]);
 
   const openEditModal = useCallback((batch) => {
     setEditingBatch(batch);
