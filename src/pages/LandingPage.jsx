@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
+import { useInstallPrompt } from "../hooks/useInstallPrompt";
+import InstallGuideModal from "../components/InstallGuideModal";
 
 const pharmacistFeatures = [
   { icon: "inventory_2", titleKey: "landing.pharmacistFeatures.inventory", descKey: "landing.pharmacistFeatures.inventoryDesc" },
@@ -30,26 +32,21 @@ const stats = [
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showGuide, setShowGuide] = useState(false);
+  const { deferredPrompt, isStandalone, justInstalled, promptInstall } = useInstallPrompt();
 
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
-
-  const handleInstall = useCallback(async () => {
-    if (!deferredPrompt) {
-      toast(t("landing.installHint"), { icon: "📱", duration: 4000 });
+  const handleInstall = async () => {
+    if (justInstalled || isStandalone) {
+      toast(t("landing.alreadyInstalled"), { icon: "✅", duration: 4000 });
       return;
     }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") setDeferredPrompt(null);
-  }, [deferredPrompt, t]);
+    if (deferredPrompt) {
+      const accepted = await promptInstall();
+      if (accepted) toast(t("landing.installDone"), { icon: "✅", duration: 4000 });
+      return;
+    }
+    setShowGuide(true);
+  };
 
   return (
     <div className="min-h-screen bg-surface text-on-surface antialiased overflow-x-hidden">
@@ -73,7 +70,7 @@ export default function LandingPage() {
             <button
               onClick={handleInstall}
               className="h-9 w-9 rounded-xl bg-surface-container-high/80 flex items-center justify-center hover:bg-surface-container-high transition-colors group"
-              title={deferredPrompt ? t("landing.installApp") : t("landing.installHint")}
+              title={t("landing.installApp")}
             >
               <span className="material-symbols-outlined text-on-surface-variant text-[18px] group-hover:text-primary transition-colors">download</span>
             </button>
@@ -280,6 +277,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {showGuide && <InstallGuideModal onClose={() => setShowGuide(false)} />}
     </div>
   );
 }

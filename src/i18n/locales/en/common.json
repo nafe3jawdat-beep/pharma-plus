@@ -1235,7 +1235,18 @@
     "statAccess": "Always Available",
     "statSecure": "Fully Secure",
     "installApp": "Install App",
-    "installHint": "Use your browser's \"Install\" or \"Add to Home Screen\" option to install the app."
+    "installHint": "Use your browser's \"Install\" or \"Add to Home Screen\" option to install the app.",
+    "alreadyInstalled": "The app is already installed on this device.",
+    "installGuideTitle": "Install Pharma Plus",
+    "installGuideIntro": "Your browser did not show an install prompt. Follow these steps to install the app:",
+    "installIosStep1": "Tap the Share button in Safari.",
+    "installIosStep2": "Tap \"Add to Home Screen\".",
+    "installIosStep3": "Tap \"Add\" in the top-right corner.",
+    "installAndroidStep1": "Tap the browser menu (three dots).",
+    "installAndroidStep2": "Tap \"Install app\" or \"Add to Home screen\".",
+    "installDesktopStep1": "Click the install icon in the browser address bar (or open the menu and choose \"Install\").",
+    "installDesktopStep2": "Confirm the installation when prompted.",
+    "installDone": "You'll now find the app on your device."
   },
 
   "filters": {
