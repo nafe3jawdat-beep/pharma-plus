@@ -120,7 +120,7 @@ export default function PharmacistLayout() {
     api("GET", `/api/v1/pharmacist/pharmacies/${pharmacyId}/inventory`, { params: { page: 1 } })
       .then(res => {
         const items = res?.data ?? [];
-        if (items.length > 0) cacheInventory(items, pharmacyId);
+        if (items.length > 0) cacheInventory(items, pharmacyId).catch((err) => console.error('[cache] layout inventory', err));
       })
       .catch(() => {});
   }, [selectedPharmacy?.id]);

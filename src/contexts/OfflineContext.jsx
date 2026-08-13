@@ -11,6 +11,12 @@ export function OfflineProvider({ children }) {
   const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
+    db.open().catch((err) => console.error('[offline] IndexedDB open failed', err));
+    const handleVersionChange = () => {
+      db.close();
+    };
+    db.on('versionchange', handleVersionChange);
+
     startSyncEngine();
 
     const handleBackendReachable = (reachable) => {
@@ -41,6 +47,7 @@ export function OfflineProvider({ children }) {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibility);
       unsubscribeBackend();
+      db.on.versionchange.unsubscribe(handleVersionChange);
     };
   }, []);
 

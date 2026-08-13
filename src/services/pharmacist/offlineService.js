@@ -94,14 +94,15 @@ export async function cacheInventory(items, pharmacyId) {
       cachedAt: timestamp,
       raw: item,
     }));
-    await db.inventory.bulkAdd(mapped);
+    await db.inventory.bulkPut(mapped);
   });
 }
 
 export async function getCachedInventory(pharmacyId) {
   try {
     return await db.inventory.where('pharmacyId').equals(pharmacyId).toArray();
-  } catch {
+  } catch (err) {
+    console.error('[cache] getCachedInventory failed', err);
     return [];
   }
 }
@@ -114,7 +115,8 @@ export async function getOldestCacheTime(pharmacyId) {
       const d = new Date(item.cachedAt);
       return d < oldest ? d : oldest;
     }, new Date());
-  } catch {
+  } catch (err) {
+    console.error('[cache] getOldestCacheTime failed', err);
     return null;
   }
 }
@@ -131,7 +133,8 @@ export async function getCachedDashboard(pharmacyId) {
   try {
     const record = await db.dashboardCache.get(pharmacyId);
     return record?.data ?? null;
-  } catch {
+  } catch (err) {
+    console.error('[cache] getCachedDashboard failed', err);
     return null;
   }
 }
@@ -148,7 +151,8 @@ export async function getCachedEmployees(pharmacyId) {
   try {
     const record = await db.employeeCache.get(pharmacyId);
     return record?.data ?? [];
-  } catch {
+  } catch (err) {
+    console.error('[cache] getCachedEmployees failed', err);
     return [];
   }
 }
@@ -165,7 +169,8 @@ export async function getCachedBatches(pharmacyId, itemId) {
   try {
     const record = await db.batchCache.get(`${pharmacyId}:${itemId}`);
     return record?.data ?? [];
-  } catch {
+  } catch (err) {
+    console.error('[cache] getCachedBatches failed', err);
     return [];
   }
 }

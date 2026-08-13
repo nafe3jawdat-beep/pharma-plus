@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { stockApi, batchApi, cacheInventory, getCachedInventory, cacheBatches, getCachedBatches } from '../../services/pharmacist';
+import { useOffline } from '../../contexts/OfflineContext';
 import toast from 'react-hot-toast';
 import BatchModal from './BatchModal';
 import BatchSummaryCard from './BatchSummaryCard';
@@ -10,8 +11,10 @@ import InventoryList from './InventoryList';
 export default function BatchesPage() {
   const { t } = useTranslation();
   const { selectedPharmacy } = useOutletContext();
+  const { pendingCount } = useOffline();
   const pharmacyId = selectedPharmacy?.id;
   const observerRef = useRef(null);
+  const prevPendingCountRef = useRef(pendingCount);
 
   const [inventory, setInventory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +47,7 @@ export default function BatchesPage() {
         setInventory(prev => [...prev, ...items]);
       } else {
         setInventory(items);
-        cacheInventory(items, pharmacyId).catch(() => {});
+        cacheInventory(items, pharmacyId).catch((err) => console.error('[cache] inventory', err));
       }
       const meta = res?.meta;
       setHasMore(meta ? meta.current_page < meta.last_page : items.length === 50);
@@ -71,7 +74,7 @@ export default function BatchesPage() {
       const res = await batchApi.list(pharmacyId, itemId);
       setBatches(res?.data ?? []);
       setBatchMeta(res?.meta ?? null);
-      cacheBatches(pharmacyId, itemId, res?.data ?? []).catch(() => {});
+      cacheBatches(pharmacyId, itemId, res?.data ?? []).catch((err) => console.error('[cache] batches', err));
     } catch {
       const cached = await getCachedBatches(pharmacyId, itemId);
       setBatches(cached);
@@ -129,7 +132,7 @@ export default function BatchesPage() {
         };
         const next = [optimistic, ...batches];
         setBatches(next);
-        cacheBatches(pharmacyId, selectedItem.id, next).catch(() => {});
+        cacheBatches(pharmacyId, selectedItem.id, next).catch((err) => console.error('[cache] batches', err));
       } else {
         toast.success(t("batches.batchCreated"));
         fetchBatches(selectedItem.id);
@@ -160,7 +163,7 @@ export default function BatchesPage() {
           b.id === editingBatch.id ? { ...b, quantity: payload.quantity, wholesale_price: payload.wholesale_price, expiration_date: payload.expiration_date } : b
         );
         setBatches(next);
-        cacheBatches(pharmacyId, selectedItem.id, next).catch(() => {});
+        cacheBatches(pharmacyId, selectedItem.id, next).catch((err) => console.error('[cache] batches', err));
       } else {
         toast.success(t("batches.batchUpdated"));
         fetchBatches(selectedItem.id);
@@ -183,7 +186,7 @@ export default function BatchesPage() {
         toast.success(t("batches.offlineQueued"));
         const next = batches.filter((b) => b.id !== batch.id);
         setBatches(next);
-        cacheBatches(pharmacyId, selectedItem.id, next).catch(() => {});
+        cacheBatches(pharmacyId, selectedItem.id, next).catch((err) => console.error('[cache] batches', err));
       } else {
         toast.success(t("batches.batchDeleted"));
         fetchBatches(selectedItem.id);
@@ -213,6 +216,14 @@ export default function BatchesPage() {
     setSelectedItem(item);
     fetchBatches(item.id);
   }, [fetchBatches]);
+
+  useEffect(() => {
+    const wasPending = prevPendingCountRef.current > 0;
+    prevPendingCountRef.current = pendingCount;
+    if (wasPending && pendingCount === 0 && selectedItem) {
+      fetchBatches(selectedItem.id);
+    }
+  }, [pendingCount, selectedItem, fetchBatches]);
 
   return (
     <div className="h-full overflow-y-auto bg-surface flex flex-col">

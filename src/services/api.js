@@ -1,5 +1,5 @@
 import { db } from './db';
-import { reportApiResult } from './connectivity';
+import { reportApiResult, isBackendReachable } from './connectivity';
 
 export const BaseUrl = import.meta.env.VITE_API_URL || "";
 
@@ -54,7 +54,10 @@ export async function offlineApi(method, path, opts = {}) {
   try {
     return await api(method, path, opts);
   } catch (err) {
-    if (!err.response && !navigator.onLine) {
+    if (err.response || (navigator.onLine && isBackendReachable() !== false)) {
+      throw err;
+    }
+    try {
       await db.pendingActions.add({
         type: 'API_CALL',
         endpoint: path,
@@ -67,7 +70,9 @@ export async function offlineApi(method, path, opts = {}) {
         lastError: null,
       });
       return { queued: true, offline: true };
+    } catch (queueErr) {
+      console.error('[offline] failed to enqueue offline action', { path, method, error: queueErr });
+      throw new Error('Offline save failed: local storage unavailable', { cause: queueErr });
     }
-    throw err;
   }
 }
