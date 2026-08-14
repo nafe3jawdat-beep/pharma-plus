@@ -9,7 +9,6 @@ import { analyticsApi, pharmacyApi } from "../services/pharmacist";
 
 const PERIOD_OPTIONS = [
   { value: 7, label: "last7Days" },
-  { value: 30, label: "last30Days" },
 ];
 
 const DEMAND_RADIUS_KM = 10;
@@ -262,13 +261,24 @@ export default function AnalyticsPage() {
             {t("analytics.aiDemandSummary")}
           </h2>
           {ai.status !== "idle" && ai.status !== "loading" && (
-            <button
-              onClick={fetchAiDemand}
-              className="flex items-center gap-1.5 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors"
-            >
-              <span className="material-symbols-outlined text-base">refresh</span>
-              {t("analytics.refresh")}
-            </button>
+            <div className="flex items-center gap-2">
+              {(ai.status === "pending" || ai.status === "ready") && (
+                <button
+                  onClick={generateDemandSummary}
+                  className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-primary-dim px-4 py-1.5 text-sm font-bold text-on-primary shadow-md transition-all hover:-translate-y-0.5"
+                >
+                  <span className="material-symbols-outlined text-base">auto_awesome</span>
+                  {t("analytics.generateDemandSummary")}
+                </button>
+              )}
+              <button
+                onClick={fetchAiDemand}
+                className="flex items-center gap-1.5 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined text-base">refresh</span>
+                {t("analytics.refresh")}
+              </button>
+            </div>
           )}
         </div>
 
