@@ -128,8 +128,12 @@ export default function AnalyticsPage() {
       } else {
         setAi({ status: "idle", data: null });
       }
-    } catch {
-      setAi((p) => ({ ...p, status: "error" }));
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        setAi({ status: "idle", data: null });
+      } else {
+        setAi((p) => ({ ...p, status: "error" }));
+      }
     }
   }, [pharmacyId]);
 
