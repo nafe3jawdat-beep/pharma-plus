@@ -1364,5 +1364,12 @@
     "expiringSoon": "Expiring Soon",
     "emptyBatches": "Empty Batches",
     "showingBatches": "{{total}} batches total"
+  },
+
+  "sendGrace": {
+    "sendingIn": "Sending in {{seconds}}s",
+    "hint": "You can cancel before the request is sent",
+    "cancel": "Cancel",
+    "cancelled": "Submission cancelled"
   }
 }

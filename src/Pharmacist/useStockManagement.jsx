@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { stockApi } from '../services/pharmacist';
 import { api, offlineApi } from '../services/api';
 import { cacheInventory, getCachedInventory } from '../services/pharmacist';
+import { useSendGrace } from '../hooks/useSendGrace';
 
 export function useStockManagement(pharmacyId, lowStock = false) {
   const { t } = useTranslation();
@@ -148,15 +149,12 @@ export function useStockManagement(pharmacyId, lowStock = false) {
     } finally { setAddingItemId(null); }
   };
 
-  const handleUpdateSelected = async () => {
-    if (!pharmacyId) return;
-    setUpdating(true);
-    let updatedCount = 0;
+  const buildUpdates = () => {
     const minStock = parseInt(globalMinStock, 10);
     const globalMinStockChanged = !isNaN(minStock);
-
     const bulkItems = [];
     const stockUpdates = [];
+    let updatedCount = 0;
 
     const nextMeds = medications.map(med => {
       const qty = parseInt(med.addedQty, 10) || 0;
@@ -188,11 +186,13 @@ export function useStockManagement(pharmacyId, lowStock = false) {
       return med;
     });
 
-    if (updatedCount === 0) {
-      setStatusMessage({ text: t("validation.enterQuantity"), type: 'error' });
-      setUpdating(false);
-      return;
-    }
+    return { nextMeds, bulkItems, stockUpdates, updatedCount };
+  };
+
+  const updatesRef = useRef(null);
+
+  const confirmUpdateSelected = async () => {
+    const { nextMeds, bulkItems, stockUpdates, updatedCount } = updatesRef.current;
 
     setMedications(nextMeds);
 
@@ -210,6 +210,26 @@ export function useStockManagement(pharmacyId, lowStock = false) {
     await fetchInventory(1, false);
     setStatusMessage({ text: t("success.updated", { count: updatedCount }), type: 'success' });
     setUpdating(false);
+  };
+
+  const { begin } = useSendGrace({
+    onConfirm: confirmUpdateSelected,
+    onCancel: () => {
+      setUpdating(false);
+      setStatusMessage({ text: t("sendGrace.cancelled"), type: 'info' });
+    },
+  });
+
+  const handleUpdateSelected = async () => {
+    if (!pharmacyId) return;
+    const updates = buildUpdates();
+    if (updates.updatedCount === 0) {
+      setStatusMessage({ text: t("validation.enterQuantity"), type: 'error' });
+      return;
+    }
+    updatesRef.current = updates;
+    setUpdating(true);
+    begin();
   };
 
   const handleFileChange = async (e) => {

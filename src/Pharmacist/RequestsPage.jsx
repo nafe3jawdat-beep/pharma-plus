@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useOutletContext } from 'react-router-dom';
 import toast from "react-hot-toast";
 import { requestsApi } from '../services/pharmacist';
+import { useSendGrace } from '../hooks/useSendGrace';
 
 const STATUS_BADGE = {
   pending: "bg-blue-100 text-blue-700",
@@ -123,9 +124,7 @@ export default function RequestsPage() {
     }
   };
 
-  const handleMarkReady = async (orderId) => {
-    if (!window.confirm(t("requests.confirmReady"))) return;
-    setActionLoading(orderId);
+  const confirmMarkReady = async (orderId) => {
     try {
       await requestsApi.updateStatus(selectedPharmacy.id, orderId, "ready");
       setPrescriptions((prev) =>
@@ -139,6 +138,19 @@ export default function RequestsPage() {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const { begin } = useSendGrace({
+    onConfirm: confirmMarkReady,
+    onCancel: () => {
+      setActionLoading(null);
+      toast(t("sendGrace.cancelled"), { icon: "\u2716\uFE0F" });
+    },
+  });
+
+  const handleMarkReady = async (orderId) => {
+    setActionLoading(orderId);
+    begin(orderId);
   };
 
   const handleReject = async (orderId) => {

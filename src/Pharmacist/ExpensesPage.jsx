@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { expenseService } from "../services/pharmacist";
 import { BaseUrl } from "../services/api";
+import { useSendGrace } from "../hooks/useSendGrace";
 
 const CATEGORY_OPTIONS = [
   { value: "rent", labelKey: "Reports.expense_rent" },
@@ -181,20 +182,9 @@ export default function ExpensesPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedPharmacy?.id) return;
-    if (!formData.title.trim()) {
-      toast.error(t("expenses.titleRequired"));
-      return;
-    }
-    const amount = Number(formData.amount);
-    if (!amount || amount <= 0) {
-      toast.error(t("expenses.amountRequired"));
-      return;
-    }
-    setSubmitting(true);
+  const confirmSubmit = async () => {
     try {
+      const amount = Number(formData.amount);
       const fd = new FormData();
       fd.append("title", formData.title.trim());
       fd.append("amount", amount);
@@ -218,6 +208,30 @@ export default function ExpensesPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const { begin } = useSendGrace({
+    onConfirm: confirmSubmit,
+    onCancel: () => {
+      setSubmitting(false);
+      toast(t("sendGrace.cancelled"), { icon: "\u2716\uFE0F" });
+    },
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedPharmacy?.id) return;
+    if (!formData.title.trim()) {
+      toast.error(t("expenses.titleRequired"));
+      return;
+    }
+    const amount = Number(formData.amount);
+    if (!amount || amount <= 0) {
+      toast.error(t("expenses.amountRequired"));
+      return;
+    }
+    setSubmitting(true);
+    begin();
   };
 
   const handleDelete = async (record) => {

@@ -1355,5 +1355,12 @@
     "expiringSoon": "قريب الانتهاء",
     "emptyBatches": "دفعات فارغة",
     "showingBatches": "{{total}} دفعة إجمالاً"
+  },
+
+  "sendGrace": {
+    "sendingIn": "جارٍ الإرسال خلال {{seconds}} ث",
+    "hint": "يمكنك الإلغاء قبل إرسال الطلب",
+    "cancel": "إلغاء",
+    "cancelled": "تم إلغاء الإرسال"
   }
 }

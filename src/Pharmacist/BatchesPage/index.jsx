@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { stockApi, batchApi, cacheInventory, getCachedInventory, cacheBatches, getCachedBatches } from '../../services/pharmacist';
 import { useOffline } from '../../contexts/OfflineContext';
+import { useSendGrace } from '../../hooks/useSendGrace';
 import toast from 'react-hot-toast';
 import BatchModal from './BatchModal';
 import BatchSummaryCard from './BatchSummaryCard';
@@ -109,10 +110,7 @@ export default function BatchesPage() {
     observerRef.current.observe(node);
   }, [loadMore, hasMore, isLoadingMore, isLoading]);
 
-  const handleCreate = useCallback(async (e) => {
-    e.preventDefault();
-    if (!pharmacyId || !selectedItem) return;
-    setSubmitting(true);
+  const confirmCreate = useCallback(async () => {
     try {
       const payload = {
         quantity: parseInt(createForm.quantity, 10),
@@ -145,6 +143,21 @@ export default function BatchesPage() {
       setSubmitting(false);
     }
   }, [pharmacyId, selectedItem, createForm, batches, t, fetchBatches]);
+
+  const { begin } = useSendGrace({
+    onConfirm: confirmCreate,
+    onCancel: () => {
+      setSubmitting(false);
+      toast(t("sendGrace.cancelled"), { icon: "\u2716\uFE0F" });
+    },
+  });
+
+  const handleCreate = useCallback(async (e) => {
+    e.preventDefault();
+    if (!pharmacyId || !selectedItem) return;
+    setSubmitting(true);
+    begin();
+  }, [pharmacyId, selectedItem, begin]);
 
   const handleEdit = useCallback(async (e) => {
     e.preventDefault();

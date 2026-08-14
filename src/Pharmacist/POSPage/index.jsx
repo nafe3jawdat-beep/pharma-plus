@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { posApi, enqueuePosAction, lookupByBarcode, cacheInventory, getCachedInventory, stockApi } from '../../services/pharmacist';
 import { useOffline } from '../../contexts/OfflineContext';
 import { useBackendReachable } from '../../hooks/useBackendReachable';
+import { useSendGrace } from '../../hooks/useSendGrace';
 import BarcodeScanner from '../../components/BarcodeScanner';
 import toast from 'react-hot-toast';
 import POSHeader from './POSHeader';
@@ -245,31 +246,7 @@ export default function POSPage() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleSubmit = useCallback(async () => {
-    if (cart.length === 0) {
-      toast(t('pos.cartEmpty'), { icon: '\u26A0\uFE0F' });
-      return;
-    }
-    if (!selectedPharmacy?.id) {
-      toast.error(t('pos.noPharmacySelected'));
-      return;
-    }
-
-    if (mode === 'purchase') {
-      if (!supplierName.trim()) {
-        toast.error(t('pos.enterSupplierName'));
-        return;
-      }
-      const invalidItems = cart.filter(
-        (c) => !Number(c.wholesale_price) || Number(c.wholesale_price) <= 0 || !c.expiration_date
-      );
-      if (invalidItems.length > 0) {
-        toast.error(t('pos.purchaseMissingFields', { items: invalidItems.map((c) => c.name).join(', ') }));
-        return;
-      }
-    }
-
-    setIsSubmitting(true);
+  const confirmSubmit = useCallback(async () => {
     try {
       const spec = OFFLINE_SPEC[mode];
       const payload = spec.payload(cart, { notes, invoiceNumber, supplierName });
@@ -334,6 +311,42 @@ export default function POSPage() {
       setIsSubmitting(false);
     }
   }, [cart, selectedPharmacy, mode, notes, invoiceNumber, supplierName, backendReachable, t]);
+
+  const { begin } = useSendGrace({
+    onConfirm: confirmSubmit,
+    onCancel: () => {
+      setIsSubmitting(false);
+      toast(t('sendGrace.cancelled'), { icon: '\u2716\uFE0F' });
+    },
+  });
+
+  const handleSubmit = useCallback(() => {
+    if (cart.length === 0) {
+      toast(t('pos.cartEmpty'), { icon: '\u26A0\uFE0F' });
+      return;
+    }
+    if (!selectedPharmacy?.id) {
+      toast.error(t('pos.noPharmacySelected'));
+      return;
+    }
+
+    if (mode === 'purchase') {
+      if (!supplierName.trim()) {
+        toast.error(t('pos.enterSupplierName'));
+        return;
+      }
+      const invalidItems = cart.filter(
+        (c) => !Number(c.wholesale_price) || Number(c.wholesale_price) <= 0 || !c.expiration_date
+      );
+      if (invalidItems.length > 0) {
+        toast.error(t('pos.purchaseMissingFields', { items: invalidItems.map((c) => c.name).join(', ') }));
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+    begin();
+  }, [cart, selectedPharmacy, mode, supplierName, t, begin]);
 
   return (
     <div className="h-full overflow-y-auto bg-surface flex flex-col">
