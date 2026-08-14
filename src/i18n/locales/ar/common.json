@@ -903,7 +903,21 @@
     "yourPharmacy": "صيدليتك",
     "highDemand": "طلب مرتفع",
     "mediumDemand": "طلب متوسط",
-    "lowDemand": "طلب منخفض"
+    "lowDemand": "طلب منخفض",
+    "aiDemandSummary": "ملخص الطلب بالذكاء الاصطناعي",
+    "aiDemandPrompt": "أنشئ تحليلًا ذكيًا لطلب الأدوية في منطقتك استنادًا إلى أكثر عمليات البحث شيوعًا.",
+    "generateDemandSummary": "إنشاء ملخص الطلب",
+    "refresh": "تحديث",
+    "retry": "إعادة المحاولة",
+    "generating": "جارٍ إنشاء التحليل الذكي...",
+    "generationPending": "جارٍ إنشاء التحليل الذكي. قد يستغرق بضع لحظات — حدّث للتحقق من الحالة.",
+    "generationError": "حدث خطأ أثناء إنشاء التحليل.",
+    "epidemicWarning": "تم رصد تحذير وبائي",
+    "noEpidemicWarning": "لا يوجد تحذير وبائي",
+    "threatLevel": "مستوى التهديد",
+    "combinedDemandScore": "درجة الطلب",
+    "actionableAdvice": "نصائح عملية للصيدلية",
+    "topUsages": "أبرز اتجاهات الاستخدام"
   },
 
   "placeholders": {

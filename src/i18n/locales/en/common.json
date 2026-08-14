@@ -912,7 +912,21 @@
     "yourPharmacy": "Your Pharmacy",
     "highDemand": "high demand",
     "mediumDemand": "medium demand",
-    "lowDemand": "low demand"
+    "lowDemand": "low demand",
+    "aiDemandSummary": "AI Demand Summary",
+    "aiDemandPrompt": "Generate an AI-powered epidemic demand analysis for your pharmacy based on the top medication searches in your area.",
+    "generateDemandSummary": "Generate Demand Summary",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "generating": "Generating AI analysis...",
+    "generationPending": "AI analysis is being generated. It may take a few moments — refresh to check the status.",
+    "generationError": "Something went wrong while generating the analysis.",
+    "epidemicWarning": "Epidemic warning detected",
+    "noEpidemicWarning": "No epidemic warning",
+    "threatLevel": "Threat level",
+    "combinedDemandScore": "Demand score",
+    "actionableAdvice": "Actionable pharmacy advice",
+    "topUsages": "Top usage trends"
   },
 
   "placeholders": {
