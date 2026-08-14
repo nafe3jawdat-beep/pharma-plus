@@ -194,6 +194,10 @@ export default function AnalyticsPage() {
   const snapshot = ai.data?.input_snapshot ?? null;
   const topUsages = Array.isArray(snapshot?.top_usages) ? snapshot.top_usages : [];
   const advice = Array.isArray(aiInsights?.actionable_pharmacy_advice) ? aiInsights.actionable_pharmacy_advice : [];
+  const showAiTop = ai.status === "ready" && topUsages.length > 0;
+  const medList = showAiTop
+    ? topUsages.map((u) => ({ name: u.resolved_usage, demand: u.search_count, trend: null, countKey: "searches" }))
+    : topMeds.map((m) => ({ ...m, countKey: "requests" }));
 
   return (
     <div className="flex-1 h-screen overflow-y-auto bg-surface p-6 lg:p-10">
@@ -372,20 +376,6 @@ export default function AnalyticsPage() {
                 </ul>
               </div>
             )}
-
-            {topUsages.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold mb-2">{t("analytics.topUsages")}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {topUsages.map((u, i) => (
-                    <div key={i} className="flex items-center justify-between bg-surface-container-lowest rounded-lg px-3.5 py-2.5 text-sm">
-                      <span className="text-on-surface">{u.resolved_usage}</span>
-                      <span className="text-on-surface-variant font-bold tabular-nums">{u.search_count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -450,23 +440,25 @@ export default function AnalyticsPage() {
         <div className="bg-surface-container-low rounded-2xl p-4">
           <h2 className="font-semibold text-lg mb-4">{t("analytics.topMedications")}</h2>
           <div className="space-y-3">
-            {topMeds.slice(0, 5).map((med, i) => (
+            {medList.slice(0, 5).map((med, i) => (
               <div key={i} className="p-4 bg-surface-container-lowest rounded-xl">
                 <p className="font-medium">{med.name}</p>
                 <p className="text-sm text-on-surface-variant">
-                  {med.demand} {t("analytics.requests")}
+                  {med.demand} {t("analytics." + med.countKey)}
                 </p>
-                <span
-                  className={`text-xs mt-2 inline-block px-2 py-1 rounded-full ${
-                    med.trend === "up"
-                      ? "bg-green-100 text-green-700"
-                      : med.trend === "down"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-gray-100"
-                  }`}
-                >
-                  {med.trend === "up" ? t("analytics.increasing") : med.trend === "down" ? t("analytics.decreasing") : t("analytics.stable")}
-                </span>
+                {med.trend && (
+                  <span
+                    className={`text-xs mt-2 inline-block px-2 py-1 rounded-full ${
+                      med.trend === "up"
+                        ? "bg-green-100 text-green-700"
+                        : med.trend === "down"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-gray-100"
+                    }`}
+                  >
+                    {med.trend === "up" ? t("analytics.increasing") : med.trend === "down" ? t("analytics.decreasing") : t("analytics.stable")}
+                  </span>
+                )}
               </div>
             ))}
           </div>

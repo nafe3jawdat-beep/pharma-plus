@@ -906,6 +906,7 @@
     "demandHeatmap": "Demand Heatmap",
     "topMedications": "Top Requested Medications",
     "requests": "requests",
+    "searches": "searches",
     "increasing": "Increasing",
     "decreasing": "Decreasing",
     "stable": "Stable",
