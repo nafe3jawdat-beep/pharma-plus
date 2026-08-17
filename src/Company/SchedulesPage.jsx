@@ -14,13 +14,6 @@ const STATUS_STYLES = {
   cancelled: { border: "border-s-rose-400",      bg: "bg-rose-50",               text: "text-rose-600",      dot: "bg-rose-400",        badge: "bg-rose-100 text-rose-600" },
 };
 
-const STATUS_LABEL_KEYS = {
-  planned: "schedules.statusPlanned",
-  upcoming: "schedules.statusUpcoming",
-  completed: "schedules.statusCompleted",
-  cancelled: "schedules.statusCancelled",
-};
-
 function getWeekStart(date) {
   const d = new Date(date);
   const day = d.getDay();
@@ -59,7 +52,7 @@ function AdherenceRing({ rate }) {
   );
 }
 
-function InlineCreateForm({ dayDate, repId, onClose, onCreated }) {
+function QuickCreateSheet({ dayDate, repId, onClose, onCreated }) {
   const { t } = useTranslation();
   const [doctors, setDoctors] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -94,50 +87,104 @@ function InlineCreateForm({ dayDate, repId, onClose, onCreated }) {
   };
 
   function getDocName(d) { const u = d?.user; return u ? `${u.f_name || ""} ${u.l_name || ""}`.trim() : d?.id || "Unknown"; }
+  function getDocInitials(d) { const u = d?.user; return ((u?.f_name?.[0] || "") + (u?.l_name?.[0] || "")).toUpperCase() || "?"; }
+
+  const dayLabel = dayDate.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 
   return (
-    <div className="bg-surface-container-lowest rounded-xl border border-surface-container-high p-3.5 shadow-lg ring-1 ring-primary/10 space-y-3 animate-[slideUp_0.2s_ease-out] origin-top" onClick={(e) => e.stopPropagation()}>
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider">
-          <span className="material-symbols-outlined text-xs">add_circle</span>
-          {t("schedules.emptySlot")}
-        </span>
-        <button onClick={onClose} className="p-1 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-all">
-          <span className="material-symbols-outlined text-sm">close</span>
-        </button>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div
+        className="relative bg-surface-container-lowest w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl border border-surface-container-high overflow-hidden animate-[slideUp_0.25s_ease-out]"
+        onClick={(e) => e.stopPropagation()}>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[9px] uppercase tracking-widest text-on-surface-variant/60 font-bold">{t("schedules.selectDoctor")}</label>
-        <select value={selectedDoctor} onChange={(e) => setSelectedDoctor(e.target.value)}
-          className="w-full bg-surface-container/50 text-on-surface px-3 py-2 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none">
-          <option value="">{t("schedules.selectDoctor")}</option>
-          {assignedDoctors.map((d) => (<option key={d.id} value={d.id}>{getDocName(d)}</option>))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2.5">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[9px] uppercase tracking-widest text-on-surface-variant/60 font-bold">{t("schedules.time")}</label>
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)}
-            className="bg-surface-container/50 text-on-surface px-3 py-2 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+        {/* Header */}
+        <div className="px-6 pt-6 pb-4 border-b border-surface-container-high">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-xl">add_circle</span>
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-on-surface">{t("schedules.createTitle")}</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">{dayLabel}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 rounded-xl hover:bg-surface-container-high text-on-surface-variant transition-all">
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[9px] uppercase tracking-widest text-on-surface-variant/60 font-bold">{t("schedules.notes")}</label>
-          <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("schedules.notesPlaceholder")}
-            className="bg-surface-container/50 text-on-surface px-3 py-2 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5 max-h-[60vh] overflow-y-auto">
+
+          {/* Doctor Select */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.selectDoctor")}</label>
+            <div className="max-h-44 overflow-y-auto rounded-xl border border-surface-container-high divide-y divide-surface-container-high">
+              {assignedDoctors.length === 0 ? (
+                <div className="p-4 text-center">
+                  <span className="material-symbols-outlined text-2xl text-on-surface-variant/20 block mb-1">person_search</span>
+                  <p className="text-xs text-on-surface-variant">{t("schedules.selectRep")}</p>
+                </div>
+              ) : assignedDoctors.map((d) => {
+                const sel = selectedDoctor === d.id;
+                return (
+                  <button key={d.id} type="button" onClick={() => setSelectedDoctor(d.id)}
+                    className={`w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-3 ${
+                      sel ? "bg-primary/[0.06]" : "hover:bg-surface-container"}`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-extrabold flex-shrink-0 ${
+                      sel ? "bg-primary text-on-primary" : "bg-primary-container/20 text-primary"}`}>
+                      {getDocInitials(d)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={`truncate font-semibold ${sel ? "text-primary" : "text-on-surface"}`}>{getDocName(d)}</p>
+                    </div>
+                    {sel && <span className="material-symbols-outlined text-primary text-lg">check_circle</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Time & Notes Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.time")}</label>
+              <input type="time" value={time} onChange={(e) => setTime(e.target.value)}
+                className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.notes")}</label>
+              <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("schedules.notesPlaceholder")}
+                className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-on-surface-variant/40" />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-surface-container-high flex gap-3">
+          <button onClick={onClose}
+            className="flex-1 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface text-sm font-bold transition-all">
+            {t("app.cancel")}
+          </button>
+          <button onClick={handleSubmit} disabled={submitting || !selectedDoctor}
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary text-sm font-bold transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0 flex items-center justify-center gap-2">
+            {submitting ? (
+              <>
+                <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+                {t("schedules.creating")}
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-sm">add</span>
+                {t("schedules.created").replace("!", "").trim() || "Create"}
+              </>
+            )}
+          </button>
         </div>
       </div>
-
-      <button onClick={handleSubmit} disabled={submitting || !selectedDoctor}
-        className="w-full py-2 rounded-lg bg-gradient-to-r from-primary to-primary-dim text-on-primary text-xs font-bold transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0">
-        {submitting ? (
-          <span className="flex items-center justify-center gap-1.5">
-            <span className="material-symbols-outlined text-xs animate-spin">refresh</span>
-            {t("schedules.creating")}
-          </span>
-        ) : t("schedules.createTitle")}
-      </button>
     </div>
   );
 }
@@ -241,12 +288,6 @@ export default function SchedulesPage() {
     try { await companyService.cancelSchedule(schedule.id); toast.success(t("schedules.cancelled")); fetchData(); }
     catch { toast.error(t("schedules.cancelFailed")); }
     finally { setActionLoading(null); }
-  };
-
-  const handleDropStatus = (schedule) => {
-    if (actionLoading) return;
-    if (schedule.status === "planned") handlePublish(schedule);
-    else if (schedule.status === "upcoming") handleCancel(schedule);
   };
 
   return (
@@ -483,7 +524,7 @@ export default function SchedulesPage() {
                             return (
                               <div key={schedule.id}
                                 className={`rounded-2xl border-s-[3px] ${colors.border} ${colors.bg} p-3 transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer`}
-                                onClick={() => handleDropStatus(schedule)}>
+                                onClick={() => { if (canPublish) handlePublish(schedule); else if (canCancel) handleCancel(schedule); }}>
                                 <div className="flex items-start justify-between gap-1">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1 mb-2">
@@ -502,7 +543,6 @@ export default function SchedulesPage() {
                                     )}
                                   </div>
 
-                                  {/* Actions */}
                                   <div className="flex flex-col gap-1 shrink-0 pt-0.5">
                                     {canPublish && (
                                       <button onClick={(e) => { e.stopPropagation(); handlePublish(schedule); }} disabled={isBusy}
@@ -528,16 +568,11 @@ export default function SchedulesPage() {
 
                           {!isFriday && (
                             <div className="mt-auto">
-                              {inlineCreate?.dateKey === dateKey ? (
-                                <InlineCreateForm dayDate={dayDate} repId={selectedRepId || (reps[0]?.id ?? "")}
-                                  onClose={() => setInlineCreate(null)} onCreated={fetchData} />
-                              ) : (
-                                <button onClick={() => setInlineCreate({ dateKey })}
-                                  className="w-full py-3 rounded-2xl border border-dashed border-surface-container-high/70 hover:border-primary/40 hover:bg-primary/[0.03] text-on-surface-variant/50 hover:text-primary transition-all flex items-center justify-center gap-1.5 group">
-                                  <span className="material-symbols-outlined text-base group-hover:scale-110 transition-transform">add</span>
-                                  <span className="text-[10px] font-semibold">{t("schedules.emptySlot")}</span>
-                                </button>
-                              )}
+                              <button onClick={() => setInlineCreate({ dateKey })}
+                                className="w-full py-3 rounded-2xl border border-dashed border-surface-container-high/70 hover:border-primary/40 hover:bg-primary/[0.03] text-on-surface-variant/50 hover:text-primary transition-all flex items-center justify-center gap-1.5 group">
+                                <span className="material-symbols-outlined text-base group-hover:scale-110 transition-transform">add</span>
+                                <span className="text-[10px] font-semibold">{t("schedules.emptySlot")}</span>
+                              </button>
                             </div>
                           )}
                         </div>
@@ -575,11 +610,20 @@ export default function SchedulesPage() {
           ))}
         </div>
 
-        <CreateScheduleModal open={showCreateModal} onClose={() => setCreateScheduleModal(false)} onCreated={fetchData} />
+        <CreateScheduleModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onCreated={fetchData} />
       </div>
+
+      {/* Quick Create Sheet */}
+      {inlineCreate && (
+        <QuickCreateSheet
+          dayDate={new Date(inlineCreate.dateKey + "T00:00:00")}
+          repId={selectedRepId || (reps[0]?.id ?? "")}
+          onClose={() => setInlineCreate(null)}
+          onCreated={fetchData}
+        />
+      )}
     </div>
   );
 
   function navigateWeek(dir) { setWeekStart((prev) => addDays(prev, dir * 7)); }
-  function setCreateScheduleModal(v) { setShowCreateModal(v); }
 }

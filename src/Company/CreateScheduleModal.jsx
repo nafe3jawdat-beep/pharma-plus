@@ -3,8 +3,6 @@ import toast from "react-hot-toast";
 import { companyService } from "../services/company";
 import { useTranslation } from "react-i18next";
 
-const inputClass = "w-full bg-surface-container/50 text-on-surface px-4 py-3 rounded-xl outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all text-sm placeholder:text-on-surface-variant/40";
-
 function toDatetimeLocal(date) {
   const pad = (n) => n.toString().padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -97,17 +95,20 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={handleClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative bg-surface-container-lowest rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col border border-surface-container-high animate-[fadeIn_0.2s_ease-out]"
+      <div className="relative bg-surface-container-lowest rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col border border-surface-container-high overflow-hidden"
         onClick={(e) => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 flex-shrink-0">
-          <div className="flex items-center justify-between mb-5">
+        <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-surface-container-high">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <span className="material-symbols-outlined text-primary text-xl">calendar_month</span>
               </div>
-              <h2 className="text-lg font-extrabold text-on-surface">{t("schedules.createTitle")}</h2>
+              <div>
+                <h2 className="text-lg font-extrabold text-on-surface">{t("schedules.createTitle")}</h2>
+                <p className="text-xs text-on-surface-variant">{t("schedules.weeklyDescription")}</p>
+              </div>
             </div>
             <button onClick={handleClose} className="p-2 rounded-xl hover:bg-surface-container-high text-on-surface-variant transition-all">
               <span className="material-symbols-outlined text-xl">close</span>
@@ -128,14 +129,16 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-surface-container-high rounded-lg">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-surface-container-high">
 
           {/* Single Mode */}
           {mode === "single" && (
             <>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.selectRep")}</label>
-                <select value={single.rep_id} onChange={(e) => setSingle((p) => ({ ...p, rep_id: e.target.value }))} className={inputClass}>
+              {/* Rep */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.selectRep")}</label>
+                <select value={single.rep_id} onChange={(e) => setSingle((p) => ({ ...p, rep_id: e.target.value }))}
+                  className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none cursor-pointer">
                   <option value="">{t("schedules.selectRep")}</option>
                   {reps.map((r) => {
                     const name = r.user ? `${r.user.f_name || ""} ${r.user.l_name || ""}`.trim() : r.id;
@@ -144,14 +147,16 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
                 </select>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.selectDoctor")}</label>
+              {/* Doctor */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.selectDoctor")}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/50">
                     <span className="material-symbols-outlined text-lg">search</span>
                   </span>
                   <input type="text" value={doctorSearch} onChange={(e) => setDoctorSearch(e.target.value)}
-                    placeholder={t("schedules.selectDoctor") + "..."} className={`${inputClass} pl-11`} />
+                    placeholder={t("schedules.selectDoctor") + "..."}
+                    className="w-full bg-surface-container-high text-on-surface pl-11 pr-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-on-surface-variant/40" />
                 </div>
                 <div className="max-h-48 overflow-y-auto rounded-xl border border-surface-container-high divide-y divide-surface-container-high">
                   {filteredDoctors.length === 0 ? (
@@ -177,15 +182,19 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.dateTime")}</label>
-                <input type="datetime-local" value={single.scheduled_at} onChange={(e) => setSingle((p) => ({ ...p, scheduled_at: e.target.value }))} className={inputClass} />
+              {/* Date & Time */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.dateTime")}</label>
+                <input type="datetime-local" value={single.scheduled_at} onChange={(e) => setSingle((p) => ({ ...p, scheduled_at: e.target.value }))}
+                  className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.notes")}</label>
+              {/* Notes */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.notes")}</label>
                 <textarea value={single.notes} onChange={(e) => setSingle((p) => ({ ...p, notes: e.target.value }))}
-                  className={`${inputClass} min-h-[80px] resize-none`} placeholder={t("schedules.notesPlaceholder")} />
+                  className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all min-h-[80px] resize-none placeholder:text-on-surface-variant/40"
+                  placeholder={t("schedules.notesPlaceholder")} />
               </div>
             </>
           )}
@@ -193,9 +202,10 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
           {/* Batch Mode */}
           {mode === "batch" && (
             <>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.selectRep")}</label>
-                <select value={batchRepId} onChange={(e) => setBatchRepId(e.target.value)} className={inputClass}>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.selectRep")}</label>
+                <select value={batchRepId} onChange={(e) => setBatchRepId(e.target.value)}
+                  className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none cursor-pointer">
                   <option value="">{t("schedules.selectRep")}</option>
                   {reps.map((r) => {
                     const name = r.user ? `${r.user.f_name || ""} ${r.user.l_name || ""}`.trim() : r.id;
@@ -209,18 +219,19 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
                   <div key={i} className="bg-surface-container/30 rounded-xl p-4 space-y-3 relative border border-surface-container-high">
                     {rows.length > 1 && (
                       <button onClick={() => setRows((p) => p.filter((_, j) => j !== i))}
-                        className="absolute top-3 right-3 p-1 rounded-lg hover:bg-rose-100 text-on-surface-variant hover:text-rose-600 transition-all">
+                        className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-rose-100 text-on-surface-variant hover:text-rose-600 transition-all">
                         <span className="material-symbols-outlined text-sm">close</span>
                       </button>
                     )}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.selectDoctor")}</label>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.selectDoctor")}</label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50">
                           <span className="material-symbols-outlined text-lg">search</span>
                         </span>
                         <input type="text" value={row._search || ""} onChange={(e) => setRows((p) => p.map((r, j) => j === i ? { ...r, _search: e.target.value } : r))}
-                          placeholder={t("schedules.selectDoctor") + "..."} className={`${inputClass} pl-11`} />
+                          placeholder={t("schedules.selectDoctor") + "..."}
+                          className="w-full bg-surface-container-high text-on-surface pl-11 pr-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-on-surface-variant/40" />
                       </div>
                       <div className="max-h-36 overflow-y-auto rounded-xl border border-surface-container-high divide-y divide-surface-container-high">
                         {(row._search ? doctors.filter((d) => { const q = row._search.toLowerCase(); return getDoctorName(d).toLowerCase().includes(q) || (d.specialization || "").toLowerCase().includes(q); }) : doctors).length === 0 ? (
@@ -229,14 +240,14 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
                           const sel = row.doctor_id === d.id;
                           return (
                             <button key={d.id} type="button" onClick={() => setRows((p) => p.map((r, j) => j === i ? { ...r, doctor_id: d.id } : r))}
-                              className={`w-full text-left px-3 py-2 text-sm transition-all flex items-center gap-2.5 ${sel ? "bg-primary/[0.06]" : "hover:bg-surface-container"}`}>
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-extrabold flex-shrink-0 ${
+                              className={`w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-3 ${sel ? "bg-primary/[0.06]" : "hover:bg-surface-container"}`}>
+                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-extrabold flex-shrink-0 ${
                                 sel ? "bg-primary text-on-primary" : "bg-primary-container/20 text-primary"}`}>
                                 {getInitials(d)}
                               </div>
                               <div className="min-w-0">
-                                <span className={`block truncate text-xs ${sel ? "font-bold text-primary" : "font-semibold text-on-surface"}`}>{getDoctorName(d)}</span>
-                                {d.specialization && <span className="block text-[10px] text-on-surface-variant truncate">{d.specialization}</span>}
+                                <span className={`block truncate font-semibold ${sel ? "text-primary" : "text-on-surface"}`}>{getDoctorName(d)}</span>
+                                {d.specialization && <span className="block text-[11px] text-on-surface-variant truncate">{d.specialization}</span>}
                               </div>
                             </button>
                           );
@@ -244,14 +255,16 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.dateTime")}</label>
-                        <input type="datetime-local" value={row.scheduled_at} onChange={(e) => setRows((p) => p.map((r, j) => j === i ? { ...r, scheduled_at: e.target.value } : r))} className={inputClass} />
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.dateTime")}</label>
+                        <input type="datetime-local" value={row.scheduled_at} onChange={(e) => setRows((p) => p.map((r, j) => j === i ? { ...r, scheduled_at: e.target.value } : r))}
+                          className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-[11px] uppercase tracking-widest text-on-surface-variant font-bold">{t("schedules.notes")}</label>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.notes")}</label>
                         <input type="text" value={row.notes} onChange={(e) => setRows((p) => p.map((r, j) => j === i ? { ...r, notes: e.target.value } : r))}
-                          className={inputClass} placeholder={t("schedules.notesPlaceholder")} />
+                          className="w-full bg-surface-container-high text-on-surface px-4 py-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-on-surface-variant/40"
+                          placeholder={t("schedules.notesPlaceholder")} />
                       </div>
                     </div>
                   </div>
@@ -259,7 +272,7 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
               </div>
 
               <button onClick={() => setRows((p) => [...p, { doctor_id: "", scheduled_at: toDatetimeLocal(now), notes: "" }])} disabled={!batchRepId}
-                className="w-full py-2.5 rounded-xl border-2 border-dashed border-surface-container-high text-on-surface-variant text-sm font-bold hover:border-primary hover:text-primary hover:bg-primary/[0.04] transition-all flex items-center justify-center gap-1.5 disabled:opacity-40">
+                className="w-full py-3 rounded-xl border-2 border-dashed border-surface-container-high text-on-surface-variant text-sm font-bold hover:border-primary hover:text-primary hover:bg-primary/[0.04] transition-all flex items-center justify-center gap-1.5 disabled:opacity-40">
                 <span className="material-symbols-outlined text-sm">add</span>{t("schedules.addRow")}
               </button>
             </>
@@ -273,7 +286,7 @@ export default function CreateScheduleModal({ open, onClose, onCreated }) {
             {t("app.cancel")}
           </button>
           <button onClick={mode === "single" ? handleSingleSubmit : handleBatchSubmit} disabled={submitting}
-            className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-white text-sm font-bold transition-all flex items-center gap-2 shadow-md disabled:opacity-60">
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dim hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-white text-sm font-bold transition-all flex items-center gap-2 shadow-md disabled:opacity-60 disabled:hover:shadow-none disabled:hover:translate-y-0">
             {submitting ? <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
               : <span className="material-symbols-outlined text-sm">add</span>}
             {submitting ? t("schedules.creating") : t("schedules.createTitle")}
