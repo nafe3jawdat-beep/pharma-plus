@@ -2,6 +2,7 @@ import { api } from "../api";
 
 export const authApi = {
   register: (data) => api("POST", "/api/v1/pharmacist/register", { body: data }),
+  companyRegister: (data) => api("POST", "/api/v1/company/register", { body: data }),
   login: (credentials) => api("POST", "/api/v1/pharmacist/login", { body: credentials }),
   dashboard: () => api("GET", "/api/v1/pharmacist/dashboard"),
   verify: (data) => api("POST", "/api/v1/pharmacist/verify", { body: data }),
