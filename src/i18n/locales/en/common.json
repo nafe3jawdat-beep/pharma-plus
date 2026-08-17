@@ -242,7 +242,10 @@
     "adherenceRate": "Adherence Rate",
     "licenseImage": "License Image",
     "viewLicense": "View License",
-    "createdAt": "Registered Since"
+    "createdAt": "Registered Since",
+    "notVerifiedTitle": "Account Under Review",
+    "notVerifiedDescription": "Your account has not been verified yet. An administrator will review your registration and activate your account soon. You will be able to use all features once verified.",
+    "logout": "Logout"
   },
 
   "schedules": {
