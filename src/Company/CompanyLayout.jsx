@@ -16,7 +16,7 @@ export default function CompanyLayout() {
   useEffect(() => {
     companyService.getProfile()
       .then((res) => {
-        setVerificationStatus(res?.data?.verification_status ?? res?.verification_status ?? null);
+        setVerificationStatus(res?.data?.status ?? res?.status ?? null);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
