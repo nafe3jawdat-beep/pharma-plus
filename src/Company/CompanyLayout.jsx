@@ -1,20 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
+import { companyService } from "../services/company";
 import CompanySidebar from "./CompanySidebar";
 
 export default function CompanyLayout() {
   const { t } = useTranslation();
-  const { role, isAuthenticated, user, logout } = useAuth();
+  const { role, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    companyService.getProfile()
+      .then((res) => {
+        setVerificationStatus(res?.data?.verification_status ?? res?.verification_status ?? null);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   if (!isAuthenticated || role !== "company") {
     return <Navigate to="/login" replace />;
   }
 
-  const verificationStatus = user?.verification_status;
+  if (loading) {
+    return (
+      <div className="bg-surface text-on-surface min-h-screen flex items-center justify-center">
+        <span className="material-symbols-outlined text-primary text-3xl animate-spin">refresh</span>
+      </div>
+    );
+  }
 
   if (verificationStatus !== "active") {
     return (
