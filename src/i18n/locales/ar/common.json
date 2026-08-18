@@ -803,7 +803,11 @@
     "emptyUnreadTitle": "تمت القراءة بالكامل",
     "emptyUnreadDescription": "لقد قرأت جميع إشعاراتك.",
     "emptyReadTitle": "لا توجد إشعارات مقروءة",
-    "emptyReadDescription": "ستظهر الإشعارات المقروءة هنا."
+    "emptyReadDescription": "ستظهر الإشعارات المقروءة هنا.",
+    "detailsTitle": "تفاصيل الإشعار",
+    "noAdditionalDetails": "لا توجد تفاصيل إضافية متاحة.",
+    "field": "الحقل",
+    "value": "القيمة"
   },
 
   "stock": {

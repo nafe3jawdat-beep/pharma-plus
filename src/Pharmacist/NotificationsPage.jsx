@@ -89,6 +89,7 @@ export default function NotificationsPage() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const [processing, setProcessing] = useState(null);
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const { refresh } = useNotificationCount();
   const { t, i18n } = useTranslation();
   const { isOnline } = useNetworkStatus();
@@ -302,7 +303,8 @@ export default function NotificationsPage() {
                     return (
                       <div
                         key={n.id}
-                        className={`group relative overflow-hidden rounded-2xl transition-all duration-300 ${
+                        onClick={() => setSelectedNotification(n)}
+                        className={`group relative cursor-pointer overflow-hidden rounded-2xl transition-all duration-300 ${
                           isUnread
                             ? "border border-surface-container-high bg-surface-container-lowest shadow-ambient-sm hover:-translate-y-0.5 hover:shadow-ambient"
                             : "border border-transparent bg-surface-container-lowest/50 hover:border-surface-container-high/60"
@@ -355,7 +357,7 @@ export default function NotificationsPage() {
                             {(n.type === "pharmacist_invitation" || n.type === "join_request") && isUnread && (
                               <div className="mt-4 flex items-center gap-2.5">
                                 <button
-                                  onClick={() => handleAction(n.type === "pharmacist_invitation" ? "accept" : "acceptJoin", n.id)}
+                                  onClick={(e) => { e.stopPropagation(); handleAction(n.type === "pharmacist_invitation" ? "accept" : "acceptJoin", n.id); }}
                                   disabled={isProcessing}
                                   className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-all hover:shadow-lg hover:shadow-primary/20 active:scale-95 disabled:opacity-50"
                                 >
@@ -363,7 +365,7 @@ export default function NotificationsPage() {
                                   {t("app.accept")}
                                 </button>
                                 <button
-                                  onClick={() => handleAction(n.type === "pharmacist_invitation" ? "reject" : "rejectJoin", n.id)}
+                                  onClick={(e) => { e.stopPropagation(); handleAction(n.type === "pharmacist_invitation" ? "reject" : "rejectJoin", n.id); }}
                                   disabled={isProcessing}
                                   className="inline-flex items-center gap-1.5 rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-2 text-xs font-bold text-on-surface-variant transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 active:scale-95 disabled:opacity-50"
                                 >
@@ -383,6 +385,100 @@ export default function NotificationsPage() {
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {selectedNotification && (() => {
+        const cfg = typeConfig[selectedNotification.type] || fallback;
+        const data = selectedNotification.data;
+        const dataEntries = data && typeof data === "object" ? Object.entries(data) : [];
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedNotification(null)}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div
+              className="relative w-full max-w-lg rounded-3xl bg-surface-container-lowest shadow-2xl border border-surface-container-high overflow-hidden animate-fade-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-6 py-5 border-b border-surface-container-high">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-2 ${cfg.ring}`}>
+                    <span className={`material-symbols-outlined text-xl ${cfg.color}`}>{cfg.icon}</span>
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-on-surface">{t("notifications.detailsTitle")}</h2>
+                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary`}>
+                      {t(cfg.labelKey)}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedNotification(null)}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-surface-container-high transition-colors"
+                >
+                  <span className="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+              </div>
+
+              <div className="px-6 py-5 space-y-5">
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface">{selectedNotification.title || t(cfg.labelKey)}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{selectedNotification.message}</p>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-on-surface-variant">
+                  <span className="material-symbols-outlined text-sm">schedule</span>
+                  {new Date(selectedNotification.created_at).toLocaleString()}
+                </div>
+
+                {dataEntries.length > 0 && (
+                  <div className="rounded-2xl border border-surface-container-high overflow-hidden">
+                    <div className="grid grid-cols-[auto_1fr] text-xs">
+                      {dataEntries.map(([key, val]) => (
+                        <div key={key} contents>
+                          <div className="px-4 py-2.5 font-bold text-on-surface-variant bg-surface-container/50 border-b border-surface-container-high capitalize">{key.replace(/_/g, " ")}</div>
+                          <div className="px-4 py-2.5 text-on-surface border-b border-surface-container-high break-words">
+                            {typeof val === "object" ? JSON.stringify(val, null, 2) : String(val ?? "—")}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {dataEntries.length === 0 && (
+                  <p className="text-xs text-on-surface-variant/50 italic">{t("notifications.noAdditionalDetails")}</p>
+                )}
+              </div>
+
+              {(selectedNotification.type === "pharmacist_invitation" || selectedNotification.type === "join_request") && (
+                <div className="px-6 py-4 border-t border-surface-container-high flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      handleAction(selectedNotification.type === "pharmacist_invitation" ? "accept" : "acceptJoin", selectedNotification.id);
+                      setSelectedNotification(null);
+                    }}
+                    disabled={processing === selectedNotification.id}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-all hover:shadow-lg hover:shadow-primary/20 active:scale-95 disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-sm">check</span>
+                    {t("app.accept")}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleAction(selectedNotification.type === "pharmacist_invitation" ? "reject" : "rejectJoin", selectedNotification.id);
+                      setSelectedNotification(null);
+                    }}
+                    disabled={processing === selectedNotification.id}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-surface-container-high bg-surface-container-lowest px-5 py-2.5 text-sm font-bold text-on-surface-variant transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 active:scale-95 disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                    {t("app.reject")}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

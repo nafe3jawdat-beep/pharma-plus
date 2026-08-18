@@ -812,7 +812,11 @@
     "emptyUnreadTitle": "All caught up",
     "emptyUnreadDescription": "You've read all your notifications.",
     "emptyReadTitle": "No read notifications",
-    "emptyReadDescription": "Read notifications will appear here."
+    "emptyReadDescription": "Read notifications will appear here.",
+    "detailsTitle": "Notification Details",
+    "noAdditionalDetails": "No additional details available.",
+    "field": "Field",
+    "value": "Value"
   },
 
   "stock": {
