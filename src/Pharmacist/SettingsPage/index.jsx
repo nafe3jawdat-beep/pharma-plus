@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
-import { authApi } from "../../services/pharmacist";
+import { authApi, dashboardApi } from "../../services/pharmacist";
 import { companyService } from "../../services/company";
 import { adminApi } from "../../services/admin";
 import toast from "react-hot-toast";
@@ -17,13 +17,14 @@ export default function SettingsPage() {
   const isCompany = role === "company";
   const isAdmin = role === "admin";
   const outlet = useOutletContext();
+  const selectedPharmacy = isCompany || isAdmin ? null : outlet?.selectedPharmacy;
   const verificationStatus = isCompany || isAdmin ? null : outlet?.verificationStatus;
   const refreshPharmacies = isCompany || isAdmin ? null : outlet?.refreshPharmacies;
 
   const [profile, setProfile] = useState({
     f_name: user?.f_name || "", l_name: user?.l_name || "",
     email: user?.email || "", phone_number: user?.phone_number || "",
-    location: user?.location || "",
+    age: user?.age || "", gender: user?.gender || "", location: user?.location || "",
   });
   const [saving, setSaving] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -52,17 +53,18 @@ export default function SettingsPage() {
         }
       }).catch(() => {}).finally(finalize);
     } else {
-      authApi.dashboard().then((res) => {
-        const p = res.data?.pharmacist;
+      if (!selectedPharmacy?.id) { finalize(); return; }
+      dashboardApi.getPharmacyDetail(selectedPharmacy.id).then((res) => {
+        const p = res.data || res;
         if (p) {
           setProfile({
             f_name: p.f_name || "", l_name: p.l_name || "", email: p.email || "",
-            phone_number: p.phone_number || "", location: p.location || "",
+            phone_number: p.phone_number || "", age: p.age || "", gender: p.gender || "", location: p.location || "",
           });
         }
       }).catch(() => {}).finally(finalize);
     }
-  }, [isAdmin, isCompany]);
+  }, [isAdmin, isCompany, selectedPharmacy?.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,7 +81,7 @@ export default function SettingsPage() {
       } else {
         await authApi.updateProfile(profile);
         const fullName = `${profile.f_name} ${profile.l_name}`.trim();
-        if (user) login({ ...user, name: fullName, email: profile.email, f_name: profile.f_name, l_name: profile.l_name, phone_number: profile.phone_number, location: profile.location }, localStorage.getItem("token"));
+        if (user) login({ ...user, name: fullName, email: profile.email, f_name: profile.f_name, l_name: profile.l_name, phone_number: profile.phone_number, age: profile.age, gender: profile.gender, location: profile.location }, localStorage.getItem("token"));
       }
       toast.success(t("settings.profileSaved"));
     } catch {
@@ -131,6 +133,18 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-1.5">
               <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("auth.phoneNumber")}</label>
               <input type="text" name="phone_number" value={profile.phone_number} onChange={handleChange} className={inputClass} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("auth.age")}</label>
+              <input type="number" name="age" value={profile.age} onChange={handleChange} className={inputClass} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("auth.gender")}</label>
+              <select name="gender" value={profile.gender} onChange={handleChange} className={inputClass}>
+                <option value="">--</option>
+                <option value="male">{t("auth.male")}</option>
+                <option value="female">{t("auth.female")}</option>
+              </select>
             </div>
             <div className="md:col-span-2 flex flex-col gap-1.5">
               <label className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">{t("auth.location")}</label>
