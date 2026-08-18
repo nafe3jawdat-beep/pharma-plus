@@ -6,10 +6,8 @@ import toast from "react-hot-toast";
 import { medicationApi, stockApi } from "../../services/pharmacist";
 import MedicationSearchBar from "../../components/MedicationSearchBar";
 import CategoryFilter from "../../components/CategoryFilter";
-import BarcodeScanner from "../../components/BarcodeScanner";
 import MedicationList from "./MedicationList";
 import BulkActionBar from "./BulkActionBar";
-import NonPharmForm from "./NonPharmForm";
 
 export default function MedicationsPage() {
   const { t } = useTranslation();
@@ -33,9 +31,6 @@ export default function MedicationsPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-
-  const [showNonPharmForm, setShowNonPharmForm] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false);
 
   const toggleSelect = (id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -79,14 +74,13 @@ export default function MedicationsPage() {
     }
   };
 
-  const fetchMedications = async (name, company, ingredient, category, title, usage, p, append = false, barcode = "") => {
+  const fetchMedications = async (name, company, ingredient, category, title, usage, p, append = false) => {
     if (append) { setLoadingMore(true); } else { setLoading(true); }
     try {
       const params = { page: p };
       if (name.trim()) params.name = name.trim();
       if (company.trim()) params.company = company.trim();
       if (ingredient.trim()) params.active_ingredient = ingredient.trim();
-      if (barcode.trim()) params.barcode = barcode.trim();
       if (category) params.category = category;
       if (title) params.title = title;
       if (usage) params.usage = usage;
@@ -126,16 +120,6 @@ export default function MedicationsPage() {
     fetchMedications(currentName, currentCompany, currentIngredient, filters.category, filters.title, filters.usage, 1);
   }, [currentName, currentCompany, currentIngredient]);
 
-  const handleBarcodeScan = useCallback((barcode) => {
-    setScannerOpen(false);
-    setCurrentName("");
-    setCurrentCompany("");
-    setCurrentIngredient("");
-    setSearched(true);
-    setPage(1);
-    fetchMedications("", "", "", currentCategory, currentTitle, currentUsage, 1, false, barcode);
-  }, [currentCategory, currentTitle, currentUsage]);
-
   const loadMore = () => {
     const next = page + 1;
     setPage(next);
@@ -159,24 +143,6 @@ export default function MedicationsPage() {
                 <MedicationSearchBar onSearch={handleSearch} searching={loading} />
               </div>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setScannerOpen(true)}
-                  className="p-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-higher text-on-surface-variant transition-all"
-                  title={t("scanner.scanBarcode")}
-                >
-                  <span className="material-symbols-outlined text-lg">barcode_scanner</span>
-                </button>
-                <button
-                  onClick={() => { setShowNonPharmForm(prev => !prev); }}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    showNonPharmForm
-                      ? "bg-primary text-on-primary shadow-sm shadow-primary/20"
-                      : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-higher"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-sm">{showNonPharmForm ? "close" : "add"}</span>
-                  {t("nonPharm.addProduct")}
-                </button>
                 <Link to="/Dashboard/Notifications" className="relative p-2.5 hover:bg-primary-container/20 transition-all rounded-xl">
                   <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
                   {unreadCount > 0 && (
@@ -189,13 +155,6 @@ export default function MedicationsPage() {
               <CategoryFilter onFilterChange={handleFilterChange} />
             </div>
           </header>
-
-          {showNonPharmForm && (
-            <NonPharmForm
-              selectedPharmacy={selectedPharmacy}
-              onSuccess={() => setShowNonPharmForm(false)}
-            />
-          )}
 
           <div className="max-w-7xl mx-auto px-8 py-10 pb-32">
             <div className="mb-10">
@@ -295,7 +254,6 @@ export default function MedicationsPage() {
           />
         )}
 
-        <BarcodeScanner open={scannerOpen} onScan={handleBarcodeScan} onClose={() => setScannerOpen(false)} />
       </div>
     </div>
   );

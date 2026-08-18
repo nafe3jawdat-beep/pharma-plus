@@ -80,7 +80,8 @@
     "adminPanel": "Admin Panel",
     "myProposals": "My Proposals",
     "pos": "POS / Sales",
-    "batches": "Batches"
+    "batches": "Batches",
+    "products": "Products"
   },
 
   "auth": {
@@ -1085,6 +1086,38 @@
     "failed": "Failed to add product.",
     "nameRequired": "Product name is required.",
     "barcodeRequired": "Barcode is required."
+  },
+
+  "products": {
+    "title": "Products",
+    "description": "Manage non-pharmaceutical products",
+    "addProduct": "Add Product",
+    "newProduct": "New Product",
+    "editProduct": "Edit Product",
+    "name": "Product Name",
+    "barcode": "Barcode",
+    "type": "Type",
+    "namePlaceholder": "e.g. Vitamin C Cream, Sunscreen SPF50",
+    "barcodePlaceholder": "6250001002XXX",
+    "created": "Product created successfully!",
+    "updated": "Product updated successfully!",
+    "createFailed": "Failed to create product.",
+    "updateFailed": "Failed to update product.",
+    "deleted": "Product deleted successfully!",
+    "deleteFailed": "Failed to delete product.",
+    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+    "saveChanges": "Save Changes",
+    "nameRequired": "Product name is required.",
+    "barcodeRequired": "Barcode is required.",
+    "searchPlaceholder": "Search by name or barcode...",
+    "noProducts": "No products yet",
+    "noProductsHint": "Add your first non-pharmaceutical product to get started.",
+    "noSearchResults": "No matching products",
+    "loadError": "Failed to load products.",
+    "statTotal": "Total Products",
+    "statCosmetic": "Cosmetics",
+    "statMedicalDevice": "Medical Devices",
+    "statSupplement": "Supplements"
   },
 
   "pharmacySearch": {

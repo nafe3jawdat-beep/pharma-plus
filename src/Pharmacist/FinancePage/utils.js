@@ -19,6 +19,8 @@ const TABS = [
 const fmtMoney = (v) =>
   Number(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+const moneyColor = (v) => Number(v ?? 0) < 0 ? "text-rose-600" : "";
+
 const fmtPct = (v) => (v == null ? "-" : `${(Number(v) * 100).toFixed(1)}%`);
 
 const fmtDate = (d) =>
@@ -47,6 +49,7 @@ export {
   TOP_MEDS_LIMITS,
   TABS,
   fmtMoney,
+  moneyColor,
   fmtPct,
   fmtDate,
   EXPENSE_COLORS,

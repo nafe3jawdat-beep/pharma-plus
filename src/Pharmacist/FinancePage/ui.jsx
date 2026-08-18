@@ -1,4 +1,4 @@
-import { fmtMoney } from "./utils";
+import { fmtMoney, moneyColor } from "./utils";
 
 function SectionCard({ icon, title, subtitle, actions, children, className = "" }) {
   return (
@@ -44,10 +44,10 @@ function StatCard({ label, value, icon, tone = "default" }) {
 
 function KpiStrip({ t, summary, loading, error, onRetry }) {
   const metrics = [
-    { label: t("Reports.grossSales"), value: fmtMoney(summary?.gross_sales), icon: "point_of_sale", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: "text-on-surface" },
-    { label: t("Reports.netRevenue"), value: fmtMoney(summary?.net_revenue), icon: "payments", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: "text-on-surface" },
-    { label: t("Reports.grossProfit"), value: fmtMoney(summary?.gross_profit), icon: "trending_up", tile: "bg-emerald-50 text-emerald-600", valueColor: "text-emerald-600" },
-    { label: t("Reports.netProfit"), value: fmtMoney(summary?.net_profit), icon: "savings", tile: "bg-emerald-50 text-emerald-600", valueColor: "text-emerald-600" },
+    { label: t("Reports.grossSales"), value: fmtMoney(summary?.gross_sales), icon: "point_of_sale", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: moneyColor(summary?.gross_sales) || "text-on-surface" },
+    { label: t("Reports.netRevenue"), value: fmtMoney(summary?.net_revenue), icon: "payments", tile: "bg-surface-container/70 text-on-surface-variant", valueColor: moneyColor(summary?.net_revenue) || "text-on-surface" },
+    { label: t("Reports.grossProfit"), value: fmtMoney(summary?.gross_profit), icon: "trending_up", tile: moneyColor(summary?.gross_profit) ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600", valueColor: moneyColor(summary?.gross_profit) || "text-emerald-600" },
+    { label: t("Reports.netProfit"), value: fmtMoney(summary?.net_profit), icon: "savings", tile: moneyColor(summary?.net_profit) ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600", valueColor: moneyColor(summary?.net_profit) || "text-emerald-600" },
   ];
 
   if (error && !summary) {

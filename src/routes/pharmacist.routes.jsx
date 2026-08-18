@@ -12,6 +12,7 @@ import EmployeesPage from '../Pharmacist/EmployeesPage';
 import AnalyticsPage from '../Pharmacist/AnalyticsPage';
 import SettingsPage from '../Pharmacist/SettingsPage';
 import MedicationsPage from '../Pharmacist/MedicationsPage';
+import ProductsPage from '../Pharmacist/ProductsPage';
 import PharmacySearchPage from '../Pharmacist/PharmacySearchPage';
 import ProposalsPage from '../Pharmacist/ProposalsPage';
 import POSPage from '../Pharmacist/POSPage';
@@ -42,6 +43,7 @@ export default function PharmacistRoutes() {
         <Route path="AnalyticsPage" element={<ProtectedRoute requiredPermissions={[]}><AnalyticsPage /></ProtectedRoute>} />
         <Route path="Settings" element={<SettingsPage />} />
         <Route path="Medications" element={<ProtectedRoute requiredPermissions={['inventory_manage']}><MedicationsPage /></ProtectedRoute>} />
+        <Route path="Products" element={<ProtectedRoute requiredPermissions={['inventory_manage']}><ProductsPage /></ProtectedRoute>} />
         <Route path="POS" element={<ProtectedRoute requiredPermissions={['inventory_manage']}><POSPage /></ProtectedRoute>} />
         <Route path="Batches" element={<ProtectedRoute requiredPermissions={['inventory_manage']}><BatchesPage /></ProtectedRoute>} />
       </Route>

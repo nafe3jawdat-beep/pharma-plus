@@ -114,10 +114,16 @@ export default function Sidebar({ pharmacies, selectedPharmacy, setSelectedPharm
         </div>
 
         {isVerified && (isOwner || myPermissions?.inventory_manage) && (
-          <NavLink to="/Dashboard/Medications" className={linkClass}>
-            <span className="material-symbols-outlined">medication</span>
-            {t("nav.medications")}
-          </NavLink>
+          <>
+            <NavLink to="/Dashboard/Medications" className={linkClass}>
+              <span className="material-symbols-outlined">medication</span>
+              {t("nav.medications")}
+            </NavLink>
+            <NavLink to="/Dashboard/Products" className={linkClass}>
+              <span className="material-symbols-outlined">inventory_2</span>
+              {t("nav.products")}
+            </NavLink>
+          </>
         )}
 
    

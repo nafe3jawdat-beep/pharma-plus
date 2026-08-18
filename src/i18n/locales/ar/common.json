@@ -80,7 +80,8 @@
     "adminPanel": "لوحة الإدارة",
     "myProposals": "مقترحاتي",
     "pos": "نقطة البيع",
-    "batches": "الدفعات"
+    "batches": "الدفعات",
+    "products": "المنتجات"
   },
 
   "auth": {
@@ -1076,6 +1077,38 @@
     "failed": "فشلت إضافة المنتج.",
     "nameRequired": "اسم المنتج مطلوب.",
     "barcodeRequired": "الباركود مطلوب."
+  },
+
+  "products": {
+    "title": "المنتجات",
+    "description": "إدارة المنتجات غير الدوائية",
+    "addProduct": "إضافة منتج",
+    "newProduct": "منتج جديد",
+    "editProduct": "تعديل المنتج",
+    "name": "اسم المنتج",
+    "barcode": "الباركود",
+    "type": "النوع",
+    "namePlaceholder": "مثال: كريم فيتامين سي، واقي شمس SPF50",
+    "barcodePlaceholder": "6250001002XXX",
+    "created": "تم إنشاء المنتج بنجاح!",
+    "updated": "تم تحديث المنتج بنجاح!",
+    "createFailed": "فشل إنشاء المنتج.",
+    "updateFailed": "فشل تحديث المنتج.",
+    "deleted": "تم حذف المنتج بنجاح!",
+    "deleteFailed": "فشل حذف المنتج.",
+    "confirmDelete": "هل أنت متأكد من حذف \"{{name}}\"؟",
+    "saveChanges": "حفظ التغييرات",
+    "nameRequired": "اسم المنتج مطلوب.",
+    "barcodeRequired": "الباركود مطلوب.",
+    "searchPlaceholder": "بحث بالاسم أو الباركود...",
+    "noProducts": "لا توجد منتجات بعد",
+    "noProductsHint": "أضف أول منتج غير دويء للبدء.",
+    "noSearchResults": "لا توجد منتجات مطابقة",
+    "loadError": "فشل تحميل المنتجات.",
+    "statTotal": "إجمالي المنتجات",
+    "statCosmetic": "ال مستحضرات التجميل",
+    "statMedicalDevice": "الأجهزة الطبية",
+    "statSupplement": "المكملات الغذائية"
   },
 
   "pharmacySearch": {

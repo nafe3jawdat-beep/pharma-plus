@@ -1,4 +1,4 @@
-import { fmtMoney, TOP_MEDS_LIMITS, selectCls, labelCls } from "./utils";
+import { fmtMoney, moneyColor, TOP_MEDS_LIMITS, selectCls, labelCls } from "./utils";
 import { SectionCard, SectionLoading, SectionError, SectionEmpty, DataTable } from "./ui";
 
 const rankBadge = (rank) => (
@@ -20,7 +20,7 @@ export default function MedicationsTab({
       { content: <span className="tabular-nums">{Number(m.units_sold ?? m.total_quantity_sold ?? 0).toLocaleString()}</span>, align: "end" },
       { content: <span className="tabular-nums">{fmtMoney(m.revenue ?? m.unit_price)}</span>, align: "end" },
       { content: <span className="tabular-nums">{fmtMoney(m.cost ?? m.unit_cost)}</span>, align: "end" },
-      { content: <span className="font-bold tabular-nums text-emerald-600">{fmtMoney(m.net_profit)}</span>, align: "end" },
+      { content: <span className={`font-bold tabular-nums ${moneyColor(m.net_profit) || "text-emerald-600"}`}>{fmtMoney(m.net_profit)}</span>, align: "end" },
     ],
   }));
 
