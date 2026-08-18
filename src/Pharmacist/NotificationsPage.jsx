@@ -7,44 +7,49 @@ import { useNetworkStatus } from "../hooks/useNetworkStatus";
 const typeConfig = {
   pharmacist_invitation: {
     icon: "person_add",
-    color: "text-blue-600",
-    ring: "ring-blue-100",
-    dot: "bg-blue-500",
-    gradient: "from-blue-500/10 to-transparent",
+    color: "text-primary",
+    ring: "ring-primary/20",
+    dot: "bg-primary",
+    bg: "bg-primary/10",
+    gradient: "from-primary/8 to-transparent",
     labelKey: "notifications.typeInvitation",
   },
   join_request: {
     icon: "group",
-    color: "text-amber-600",
-    ring: "ring-amber-100",
-    dot: "bg-amber-500",
-    gradient: "from-amber-500/10 to-transparent",
+    color: "text-primary",
+    ring: "ring-primary/20",
+    dot: "bg-primary",
+    bg: "bg-primary/10",
+    gradient: "from-primary/8 to-transparent",
     labelKey: "notifications.typeJoinRequest",
   },
   order_update: {
     icon: "receipt_long",
-    color: "text-emerald-600",
-    ring: "ring-emerald-100",
-    dot: "bg-emerald-500",
-    gradient: "from-emerald-500/10 to-transparent",
+    color: "text-primary",
+    ring: "ring-primary/20",
+    dot: "bg-primary",
+    bg: "bg-primary/10",
+    gradient: "from-primary/8 to-transparent",
     labelKey: "notifications.typeOrder",
   },
   stock_alert: {
     icon: "inventory_2",
-    color: "text-rose-600",
-    ring: "ring-rose-100",
+    color: "text-rose-500",
+    ring: "ring-rose-200",
     dot: "bg-rose-500",
-    gradient: "from-rose-500/10 to-transparent",
+    bg: "bg-rose-50",
+    gradient: "from-rose-500/8 to-transparent",
     labelKey: "notifications.typeStockAlert",
   },
 };
 
 const fallback = {
   icon: "notifications",
-  color: "text-gray-600",
-  ring: "ring-gray-100",
-  dot: "bg-gray-400",
-  gradient: "from-gray-500/10 to-transparent",
+  color: "text-on-surface-variant",
+  ring: "ring-surface-container-high",
+  dot: "bg-on-surface-variant/40",
+  bg: "bg-surface-container-high",
+  gradient: "from-primary/5 to-transparent",
   labelKey: "notifications.typeGeneric",
 };
 
@@ -169,7 +174,7 @@ export default function NotificationsPage() {
                   <span className="material-symbols-outlined text-2xl text-on-primary">notifications</span>
                 </div>
                 {unreadCount > 0 && (
-                  <span className="absolute -end-1.5 -top-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white shadow-lg ring-2 ring-white/30">
+                  <span className="absolute -end-1.5 -top-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary-dim px-1.5 text-[11px] font-extrabold text-white shadow-lg ring-2 ring-white/30">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
@@ -272,8 +277,8 @@ export default function NotificationsPage() {
         {/* Empty */}
         {!loading && !error && filtered.length === 0 && (
           <div className="flex flex-col items-center rounded-3xl border border-dashed border-surface-container-high bg-surface-container-lowest/50 px-6 py-16 text-center">
-            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-surface-container to-surface-container-high shadow-inner">
-              <span className="material-symbols-outlined text-4xl text-on-surface-variant/40">{activeTab === "unread" ? "done_all" : "notifications_off"}</span>
+            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10">
+              <span className="material-symbols-outlined text-4xl text-primary/40">{activeTab === "unread" ? "done_all" : "notifications_off"}</span>
             </div>
             <p className="text-lg font-bold text-on-surface">{emptyMeta.title}</p>
             <p className="mt-1.5 max-w-sm text-sm text-on-surface-variant">{emptyMeta.desc}</p>
@@ -306,25 +311,25 @@ export default function NotificationsPage() {
                         onClick={() => setSelectedNotification(n)}
                         className={`group relative cursor-pointer overflow-hidden rounded-2xl transition-all duration-300 ${
                           isUnread
-                            ? "border border-surface-container-high bg-surface-container-lowest shadow-ambient-sm hover:-translate-y-0.5 hover:shadow-ambient"
+                            ? "border border-primary/15 bg-surface-container-lowest shadow-ambient-sm hover:-translate-y-0.5 hover:shadow-ambient"
                             : "border border-transparent bg-surface-container-lowest/50 hover:border-surface-container-high/60"
                         }`}
                       >
-                        {isUnread && <div className={`absolute inset-y-0 start-0 w-1 ${cfg.dot}`} />}
-                        {isUnread && <div className={`pointer-events-none absolute inset-0 bg-gradient-to-r ${cfg.gradient}`} />}
+                        {isUnread && <div className="absolute inset-y-0 start-0 w-1 bg-primary" />}
+                        {isUnread && <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />}
 
                         <div className="relative flex items-start gap-3.5 p-4 sm:p-5">
                           <div className="relative flex-shrink-0">
                             <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 ${
-                              isUnread ? `bg-white shadow-sm ring-2 ${cfg.ring}` : "bg-surface-container-high"
+                              isUnread ? "bg-primary/10 shadow-sm ring-2 ring-primary/15" : "bg-surface-container-high"
                             }`}>
-                              <span className={`material-symbols-outlined text-[20px] ${isUnread ? cfg.color : "text-on-surface-variant/40"}`}>
+                              <span className={`material-symbols-outlined text-[20px] ${isUnread ? "text-primary" : "text-on-surface-variant/40"}`}>
                                 {cfg.icon}
                               </span>
                             </div>
                             {isUnread && (
-                              <span className={`absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ${cfg.dot} ring-2 ring-white`}>
-                                <span className={`absolute inset-0 animate-ping rounded-full ${cfg.dot} opacity-40`} />
+                              <span className="absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-white">
+                                <span className="absolute inset-0 animate-ping rounded-full bg-primary opacity-40" />
                               </span>
                             )}
                           </div>
@@ -347,10 +352,10 @@ export default function NotificationsPage() {
                                 </p>
                               </div>
                               <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
-                                <span className={`whitespace-nowrap text-[11px] ${isUnread ? "font-medium text-on-surface/40" : "text-on-surface-variant/30"}`}>
+                                <span className={`whitespace-nowrap text-[11px] ${isUnread ? "font-medium text-primary/60" : "text-on-surface-variant/30"}`}>
                                   {timeAgo(n.created_at, t, i18n.language)}
                                 </span>
-                                {isUnread && <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />}
+                                {isUnread && <span className="h-2 w-2 rounded-full bg-primary" />}
                               </div>
                             </div>
 
@@ -400,8 +405,8 @@ export default function NotificationsPage() {
             >
               <div className="flex items-center justify-between px-6 py-5 border-b border-surface-container-high">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-2 ${cfg.ring}`}>
-                    <span className={`material-symbols-outlined text-xl ${cfg.color}`}>{cfg.icon}</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 ring-2 ring-primary/15">
+                    <span className="material-symbols-outlined text-xl text-primary">{cfg.icon}</span>
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-on-surface">{t("notifications.detailsTitle")}</h2>
@@ -434,7 +439,7 @@ export default function NotificationsPage() {
                     <div className="grid grid-cols-[auto_1fr] text-xs">
                       {dataEntries.map(([key, val]) => (
                         <div key={key} contents>
-                          <div className="px-4 py-2.5 font-bold text-on-surface-variant bg-surface-container/50 border-b border-surface-container-high capitalize">{key.replace(/_/g, " ")}</div>
+                          <div className="px-4 py-2.5 font-bold text-on-surface-variant bg-primary/5 border-b border-surface-container-high capitalize">{key.replace(/_/g, " ")}</div>
                           <div className="px-4 py-2.5 text-on-surface border-b border-surface-container-high break-words">
                             {typeof val === "object" ? JSON.stringify(val, null, 2) : String(val ?? "—")}
                           </div>
