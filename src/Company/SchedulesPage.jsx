@@ -66,13 +66,20 @@ function QuickCreateSheet({ dayDate, repId, onClose, onCreated }) {
     companyService.getAssignments().then((r) => setAssignments(r?.data ?? [])).catch(() => {});
   }, []);
 
-  const assignedDoctors = useMemo(() => {
-    if (!repId) return doctors;
-    return doctors.filter((d) => assignments.some((a) => String(a.rep_id) === String(repId) && String(a.doctor_id) === String(d.id)));
-  }, [doctors, assignments, repId]);
+  const isAssigned = (doctorId) =>
+    assignments.some((a) => String(a.rep_id) === String(repId) && String(a.doctor_id) === String(doctorId));
+
+  const selectedIsAssigned = selectedDoctor ? isAssigned(selectedDoctor) : false;
 
   const handleSubmit = async () => {
     if (!selectedDoctor) { toast.error(t("schedules.createError")); return; }
+    if (!selectedIsAssigned) { toast.error(t("schedules.notAssigned")); return; }
+    const now = new Date();
+    if (dayDate.toDateString() === now.toDateString()) {
+      const [h, m] = time.split(":").map(Number);
+      const sel = new Date(dayDate); sel.setHours(h, m, 0, 0);
+      if (sel < now) { toast.error(t("schedules.pastDate")); return; }
+    }
     setSubmitting(true);
     try {
       await companyService.createSchedule({
@@ -123,13 +130,14 @@ function QuickCreateSheet({ dayDate, repId, onClose, onCreated }) {
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("schedules.selectDoctor")}</label>
             <div className="max-h-44 overflow-y-auto rounded-xl border border-surface-container-high divide-y divide-surface-container-high">
-              {assignedDoctors.length === 0 ? (
+              {doctors.length === 0 ? (
                 <div className="p-4 text-center">
                   <span className="material-symbols-outlined text-2xl text-on-surface-variant/20 block mb-1">person_search</span>
                   <p className="text-xs text-on-surface-variant">{t("schedules.selectRep")}</p>
                 </div>
-              ) : assignedDoctors.map((d) => {
+              ) : doctors.map((d) => {
                 const sel = selectedDoctor === d.id;
+                const docAssigned = isAssigned(d.id);
                 return (
                   <button key={d.id} type="button" onClick={() => setSelectedDoctor(d.id)}
                     className={`w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-3 ${
@@ -141,11 +149,21 @@ function QuickCreateSheet({ dayDate, repId, onClose, onCreated }) {
                     <div className="min-w-0 flex-1">
                       <p className={`truncate font-semibold ${sel ? "text-primary" : "text-on-surface"}`}>{getDocName(d)}</p>
                     </div>
-                    {sel && <span className="material-symbols-outlined text-primary text-lg">check_circle</span>}
+                    {docAssigned ? (
+                      <span className="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>
+                    ) : (
+                      <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
+                    )}
                   </button>
                 );
               })}
             </div>
+            {selectedDoctor && !selectedIsAssigned && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium leading-relaxed">
+                <span className="material-symbols-outlined text-amber-500 text-base flex-shrink-0 mt-0.5">info</span>
+                {t("schedules.notAssigned")}
+              </div>
+            )}
           </div>
 
           {/* Time & Notes Row */}
@@ -169,7 +187,7 @@ function QuickCreateSheet({ dayDate, repId, onClose, onCreated }) {
             className="flex-1 py-3 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface text-sm font-bold transition-all">
             {t("app.cancel")}
           </button>
-          <button onClick={handleSubmit} disabled={submitting || !selectedDoctor}
+          <button onClick={handleSubmit} disabled={submitting || !selectedDoctor || !selectedIsAssigned}
             className="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary text-sm font-bold transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0 flex items-center justify-center gap-2">
             {submitting ? (
               <>
@@ -566,7 +584,7 @@ export default function SchedulesPage() {
                             );
                           })}
 
-                          {!isFriday && (
+                          {!isFriday && dayDate.toDateString() >= new Date().toDateString() && (
                             <div className="mt-auto">
                               <button onClick={() => setInlineCreate({ dateKey })}
                                 className="w-full py-3 rounded-2xl border border-dashed border-surface-container-high/70 hover:border-primary/40 hover:bg-primary/[0.03] text-on-surface-variant/50 hover:text-primary transition-all flex items-center justify-center gap-1.5 group">
