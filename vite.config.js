@@ -39,6 +39,7 @@ export default defineConfig({
       },
       devOptions: { enabled: false },
       workbox: {
+        navigateFallback: 'index.html',
         runtimeCaching: [
           {
             urlPattern: /\/api\/.*/i,
@@ -63,17 +64,6 @@ export default defineConfig({
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-            },
-          },
-          {
-            urlPattern: /\.(?:css|js)$/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'static-assets',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
               },
             },
           },

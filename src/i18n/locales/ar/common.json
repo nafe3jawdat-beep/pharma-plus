@@ -961,7 +961,7 @@
     "confirmPasswordRequired": "يرجى تأكيد كلمة المرور.",
     "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
     "ageRequired": "العمر مطلوب.",
-    "ageRange": "يجب أن يكون العمر بين 18 و 120.",
+    "ageRange": "يجب أن يكون العمر بين 20 و 80.",
     "genderRequired": "الجنس مطلوب.",
     "tradeNameRequired": "الاسم التجاري مطلوب.",
     "ingredientRequired": "المادة الفعالة مطلوبة.",
@@ -1108,7 +1108,10 @@
     "statTotal": "إجمالي المنتجات",
     "statCosmetic": "ال مستحضرات التجميل",
     "statMedicalDevice": "الأجهزة الطبية",
-    "statSupplement": "المكملات الغذائية"
+    "statSupplement": "المكملات الغذائية",
+    "addToInventoryToast": "تمت إضافة المنتج إلى المخزون!",
+    "addToInventoryHint": "انتقل إلى الدفعات لبدء إضافة الدفعات.",
+    "goToBatches": "انتقل إلى الدفعات"
   },
 
   "pharmacySearch": {

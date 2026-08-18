@@ -76,6 +76,11 @@
   --color-on-secondary-container: #b1d4d4;
 }
 
+input::-webkit-credentials-generator-button,
+input::-webkit-password-toggle-button {
+  display: none;
+}
+
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;

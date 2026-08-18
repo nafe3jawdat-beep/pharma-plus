@@ -92,6 +92,13 @@ export default function RepsPage() {
       toast.error(t("validation.passwordsDoNotMatch"));
       return;
     }
+    if (formData.age) {
+      const ageNum = parseInt(formData.age, 10);
+      if (isNaN(ageNum) || ageNum < 20 || ageNum > 80) {
+        toast.error(t("validation.ageRange"));
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const payload = {
@@ -231,7 +238,7 @@ export default function RepsPage() {
                     className={inputClass}
                     placeholder={field.placeholder}
                     min={field.name === "age" ? 20 : undefined}
-                    max={field.name === "age" ? 70 : undefined}
+                    max={field.name === "age" ? 80 : undefined}
                   />
                 </div>
               ))}

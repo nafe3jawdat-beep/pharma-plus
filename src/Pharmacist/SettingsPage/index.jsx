@@ -21,8 +21,9 @@ export default function SettingsPage() {
   const refreshPharmacies = isCompany || isAdmin ? null : outlet?.refreshPharmacies;
 
   const [profile, setProfile] = useState({
-    f_name: "", l_name: "", email: "", phone_number: "",
-    age: "", gender: "", location: "",
+    f_name: user?.f_name || "", l_name: user?.l_name || "",
+    email: user?.email || "", phone_number: user?.phone_number || "",
+    age: user?.age ?? "", gender: user?.gender || "", location: user?.location || "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -33,7 +34,8 @@ export default function SettingsPage() {
         if (p) {
           setProfile({
             f_name: p.f_name || "", l_name: p.l_name || "", email: p.email || "",
-            phone_number: p.phone_number || "", age: "", gender: "", location: "",
+            phone_number: p.phone_number || "", age: p.age ?? "",
+            gender: p.gender || "", location: p.location || "",
           });
         }
       }).catch(() => {});
@@ -42,9 +44,9 @@ export default function SettingsPage() {
         const p = res?.data;
         if (p) {
           setProfile({
-            f_name: user?.f_name || "", l_name: user?.l_name || "",
-            email: user?.email || "", phone_number: user?.phone_number || "",
-            age: "", gender: "", location: "",
+            f_name: p.f_name || "", l_name: p.l_name || "",
+            email: p.email || "", phone_number: p.phone_number || "",
+            age: p.age ?? "", gender: p.gender || "", location: p.location || "",
           });
         }
       }).catch(() => {});
@@ -60,7 +62,7 @@ export default function SettingsPage() {
         }
       }).catch(() => {});
     }
-  }, [isAdmin, isCompany, user]);
+  }, [isAdmin, isCompany]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

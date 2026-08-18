@@ -41,7 +41,7 @@ const validateStep1 = (data, t) => {
     errors.age = t("validation.ageRequired");
   } else {
     const ageNum = parseInt(data.age, 10);
-    if (isNaN(ageNum) || ageNum < 20 || ageNum > 70) {
+    if (isNaN(ageNum) || ageNum < 20 || ageNum > 80) {
       errors.age = t("validation.ageRange");
     }
   }
@@ -294,7 +294,7 @@ export default function Register() {
                   <div className="flex-1 flex flex-col space-y-1.5">
                     <label className="text-[0.75rem] font-bold uppercase text-on-surface-variant ml-1">{t("auth.age")}</label>
                     <input
-                      id="age" type="number" min={20} max={70} value={formData.age} onChange={handleChange}
+                      id="age" type="number" min={20} max={80} value={formData.age} onChange={handleChange}
                       placeholder={t("placeholders.ageExample")}
                       className={`w-full px-4 py-3 rounded-xl bg-surface-container-high border text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 transition-all ${
                         errors.age

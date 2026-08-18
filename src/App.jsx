@@ -12,10 +12,26 @@ import VerifyEmail from './pages/VerifyEmail';
 import TwoFactorVerify from './pages/TwoFactorVerify';
 import 'leaflet/dist/leaflet.css';
 
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const PharmacistRoutes = lazy(() => import('./routes/pharmacist.routes'));
-const AdminRoutes = lazy(() => import('./routes/admin.routes'));
-const CompanyRoutes = lazy(() => import('./routes/company.routes'));
+function lazyWithRetry(factory) {
+  return lazy(() => factory().catch((err) => {
+    if (typeof window !== 'undefined') {
+      const key = `sw-retry-${Date.now()}`;
+      try { sessionStorage.setItem(key, '1'); } catch {}
+      if (!sessionStorage.getItem('sw-retried')) {
+        try { sessionStorage.setItem('sw-retried', '1'); } catch {}
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      try { sessionStorage.removeItem('sw-retried'); } catch {}
+    }
+    throw err;
+  }));
+}
+
+const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
+const PharmacistRoutes = lazyWithRetry(() => import('./routes/pharmacist.routes'));
+const AdminRoutes = lazyWithRetry(() => import('./routes/admin.routes'));
+const CompanyRoutes = lazyWithRetry(() => import('./routes/company.routes'));
 
 function App() {
   const loading = <div className="h-screen flex items-center justify-center"><span className="material-symbols-outlined animate-spin text-primary text-3xl">refresh</span></div>;

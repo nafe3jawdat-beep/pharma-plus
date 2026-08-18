@@ -21,18 +21,20 @@ export default function AiBlock({ t, ai, insights, onGenerate, onRefresh }) {
   const generateBtn = (
     <button
       onClick={onGenerate}
-      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 text-sm font-bold text-on-primary shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      disabled={ai.loading}
+      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 text-sm font-bold text-on-primary shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
     >
-      <span className="material-symbols-outlined text-lg">auto_awesome</span>
+      <span className={`material-symbols-outlined text-lg ${ai.loading ? "animate-spin" : ""}`}>auto_awesome</span>
       {t("Reports.generateAiReport")}
     </button>
   );
   const refreshBtn = (
     <button
       onClick={onRefresh}
-      className="flex items-center gap-2 rounded-xl bg-surface-container-high px-4 py-2 text-sm font-bold text-on-surface transition-all hover:bg-surface-container"
+      disabled={ai.loading}
+      className="flex items-center gap-2 rounded-xl bg-surface-container-high px-4 py-2 text-sm font-bold text-on-surface transition-all hover:bg-surface-container disabled:opacity-60 disabled:cursor-not-allowed"
     >
-      <span className="material-symbols-outlined text-lg">refresh</span>
+      <span className={`material-symbols-outlined text-lg ${ai.loading ? "animate-spin" : ""}`}>refresh</span>
       {t("Reports.refresh")}
     </button>
   );

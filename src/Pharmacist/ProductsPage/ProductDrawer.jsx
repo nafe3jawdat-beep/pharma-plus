@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import { productApi } from "../../services/pharmacist";
+import { productApi, stockApi } from "../../services/pharmacist";
+import AddToInventoryToast from "../../components/AddToInventoryToast";
 
 const TYPE_OPTIONS = [
   { value: "cosmetic", label: "Cosmetic" },
@@ -26,6 +28,7 @@ function FieldTile({ label, children }) {
 
 export default function ProductDrawer({ pharmacyId, editingProduct, onClose, onSaved }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", barcode: "", type: "cosmetic" });
   const [submitting, setSubmitting] = useState(false);
 
@@ -67,8 +70,32 @@ export default function ProductDrawer({ pharmacyId, editingProduct, onClose, onS
         await productApi.update(pharmacyId, editingProduct.id, payload);
         toast.success(t("products.updated"));
       } else {
-        await productApi.create(pharmacyId, payload);
-        toast.success(t("products.created"));
+        const createdRes = await productApi.create(pharmacyId, payload);
+        const newProductId = createdRes?.data?.id;
+        if (newProductId) {
+          try {
+            await stockApi.addItem(pharmacyId, {
+              medication_id: newProductId,
+              stock: 0,
+              min_stock: 0,
+              price: 0,
+            });
+          } catch {
+            // inventory add failed silently — product still exists in catalog
+          }
+        }
+        toast.custom(
+          (toastId) => (
+            <AddToInventoryToast
+              onGo={() => {
+                toast.dismiss(toastId);
+                navigate("/Dashboard/Batches");
+              }}
+              onDismiss={() => toast.dismiss(toastId)}
+            />
+          ),
+          { duration: 8000 }
+        );
       }
       onSaved();
     } catch {
