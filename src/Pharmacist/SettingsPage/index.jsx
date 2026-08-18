@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
-import { authApi, dashboardApi } from "../../services/pharmacist";
+import { authApi } from "../../services/pharmacist";
 import { companyService } from "../../services/company";
 import { adminApi } from "../../services/admin";
 import toast from "react-hot-toast";
@@ -17,7 +17,6 @@ export default function SettingsPage() {
   const isCompany = role === "company";
   const isAdmin = role === "admin";
   const outlet = useOutletContext();
-  const selectedPharmacy = isCompany || isAdmin ? null : outlet?.selectedPharmacy;
   const verificationStatus = isCompany || isAdmin ? null : outlet?.verificationStatus;
   const refreshPharmacies = isCompany || isAdmin ? null : outlet?.refreshPharmacies;
 
@@ -53,9 +52,8 @@ export default function SettingsPage() {
         }
       }).catch(() => {}).finally(finalize);
     } else {
-      if (!selectedPharmacy?.id) { finalize(); return; }
-      dashboardApi.getPharmacyDetail(selectedPharmacy.id).then((res) => {
-        const p = res.data || res;
+      authApi.getProfile().then((res) => {
+        const p = res?.data;
         if (p) {
           setProfile({
             f_name: p.f_name || "", l_name: p.l_name || "", email: p.email || "",
@@ -64,7 +62,7 @@ export default function SettingsPage() {
         }
       }).catch(() => {}).finally(finalize);
     }
-  }, [isAdmin, isCompany, selectedPharmacy?.id]);
+  }, [isAdmin, isCompany]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

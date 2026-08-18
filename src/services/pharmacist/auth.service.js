@@ -5,6 +5,7 @@ export const authApi = {
   companyRegister: (data) => api("POST", "/api/v1/company/register", { body: data }),
   login: (credentials) => api("POST", "/api/v1/pharmacist/login", { body: credentials }),
   dashboard: () => api("GET", "/api/v1/pharmacist/dashboard"),
+  getProfile: () => api("GET", "/api/v1/pharmacist/profile"),
   verify: (data) => api("POST", "/api/v1/pharmacist/verify", { body: data }),
   verificationStatus: () => api("GET", "/api/v1/pharmacist/verification-status"),
   updateProfile: (data) => {
