@@ -238,6 +238,61 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Download App ──────────────────────────────────── */}
+      <section className="relative py-24 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-primary/[0.02] pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/30 text-primary text-[11px] font-bold tracking-wider uppercase mb-4">
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>phone_android</span>
+              {t("brand")}
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight mb-4">
+              {t("landing.downloadAppTitle")}
+            </h2>
+            <p className="text-on-surface-variant text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+              {t("landing.downloadAppSubtitle")}
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Mobile App Card */}
+            <div className="group bg-surface-container-lowest rounded-2xl border-2 border-primary/20 p-8 flex flex-col items-center text-center hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-lg shadow-primary/25 mb-6">
+                <span className="material-symbols-outlined text-on-primary text-3xl">phone_android</span>
+              </div>
+              <h3 className="text-xl font-extrabold text-on-surface mb-2">{t("landing.mobileAppTitle")}</h3>
+              <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-8 flex-1">{t("landing.mobileAppDesc")}</p>
+              <a
+                href="https://expo.dev/artifacts/eas/ClZBEeFtF4n1_VLcbKwtyqHwZ5t9nskUTlVchDLOUoY.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-12 px-8 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary font-bold text-sm shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center gap-2.5"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                {t("landing.downloadApk")}
+              </a>
+            </div>
+
+            {/* PWA Card */}
+            <div className="group bg-surface-container-lowest rounded-2xl border border-surface-container-high p-8 flex flex-col items-center text-center hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-primary-container/20 flex items-center justify-center mb-6 group-hover:bg-primary-container/40 transition-colors">
+                <span className="material-symbols-outlined text-primary text-3xl">install_mobile</span>
+              </div>
+              <h3 className="text-xl font-extrabold text-on-surface mb-2">{t("landing.pwaTitle")}</h3>
+              <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-8 flex-1">{t("landing.pwaDesc")}</p>
+              <button
+                onClick={handleInstall}
+                className="h-12 px-8 rounded-xl bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-container-high/80 border border-surface-container-high transition-all flex items-center gap-2.5"
+              >
+                <span className="material-symbols-outlined text-[18px]">install_mobile</span>
+                {t("landing.installToHomeScreen")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ─────────────────────────────────────────────── */}
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-primary/[0.03] pointer-events-none" />

@@ -1306,7 +1306,15 @@
     "installAndroidStep2": "Tap \"Install app\" or \"Add to Home screen\".",
     "installDesktopStep1": "Click the install icon in the browser address bar (or open the menu and choose \"Install\").",
     "installDesktopStep2": "Confirm the installation when prompted.",
-    "installDone": "You'll now find the app on your device."
+    "installDone": "You'll now find the app on your device.",
+    "downloadAppTitle": "Get Pharma Plus",
+    "downloadAppSubtitle": "Choose how you'd like to use Pharma Plus",
+    "mobileAppTitle": "Mobile App",
+    "mobileAppDesc": "Download and install the native Android app for the best experience",
+    "downloadApk": "Download APK",
+    "pwaTitle": "Web App (PWA)",
+    "pwaDesc": "Install the app directly from your browser without downloading",
+    "installToHomeScreen": "Install to Home Screen"
   },
 
   "filters": {
