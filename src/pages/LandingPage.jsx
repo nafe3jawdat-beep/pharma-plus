@@ -283,7 +283,7 @@ export default function LandingPage() {
               <p className="text-sm text-on-surface-variant/70 leading-relaxed mb-8 flex-1">{t("landing.pwaDesc")}</p>
               <button
                 onClick={handleInstall}
-                className="h-12 px-8 rounded-xl bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-container-high/80 border border-surface-container-high transition-all flex items-center gap-2.5"
+                className="h-12 px-8 rounded-xl bg-primary/10 text-primary font-bold text-sm border border-primary/20 hover:bg-primary/20 hover:border-primary/30 cursor-pointer transition-all flex items-center gap-2.5"
               >
                 <span className="material-symbols-outlined text-[18px]">install_mobile</span>
                 {t("landing.installToHomeScreen")}
