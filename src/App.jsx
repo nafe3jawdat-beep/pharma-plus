@@ -34,7 +34,7 @@ const AdminRoutes = lazyWithRetry(() => import('./routes/admin.routes'));
 const CompanyRoutes = lazyWithRetry(() => import('./routes/company.routes'));
 
 function App() {
-  const loading = <div className="h-screen flex items-center justify-center"><span className="material-symbols-outlined animate-spin text-primary text-3xl">refresh</span></div>;
+  const loading = <div className="h-screen" />;
 
   return (
     <AuthProvider>
