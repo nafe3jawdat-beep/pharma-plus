@@ -60,7 +60,7 @@ export default function InventoryAlerts({ inventoryAlerts, stats, loading }) {
         </div>
         {stats?.low_stock_count > 0 && (
           <div
-            onClick={() => navigate('/Dashboard/StockManagement', { state: { lowStock: true } })}
+            onClick={() => navigate('/Dashboard/Batches', { state: { lowStock: true } })}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 cursor-pointer hover:bg-red-100 hover:-translate-y-0.5 transition-all"
           >
             <span className="material-symbols-outlined text-red-500 text-sm">warning</span>
@@ -69,7 +69,7 @@ export default function InventoryAlerts({ inventoryAlerts, stats, loading }) {
           </div>
         )}
         <button
-          onClick={() => navigate('/Dashboard/StockManagement', { state: { lowStock: true } })}
+          onClick={() => navigate('/Dashboard/Batches', { state: { lowStock: true } })}
           className="text-xs font-bold text-primary hover:text-primary-dim flex items-center gap-1 transition-colors"
         >
           {t("app.viewAll")}
@@ -96,7 +96,7 @@ export default function InventoryAlerts({ inventoryAlerts, stats, loading }) {
           inventoryAlerts.map((item) => (
             <div
               key={item.id}
-              onClick={() => navigate('/Dashboard/StockManagement')}
+              onClick={() => navigate('/Dashboard/Batches')}
             >
               <InventoryProgressBar stock={item} max={100} t={t} />
             </div>

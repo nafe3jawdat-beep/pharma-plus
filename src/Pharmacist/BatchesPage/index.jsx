@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { stockApi, batchApi, cacheInventory, getCachedInventory, cacheBatches, getCachedBatches } from '../../services/pharmacist';
 import { useOffline } from '../../contexts/OfflineContext';
@@ -12,6 +12,8 @@ import InventoryList from './InventoryList';
 export default function BatchesPage() {
   const { t } = useTranslation();
   const { selectedPharmacy } = useOutletContext();
+  const { state: navState } = useLocation();
+  const lowStock = navState?.lowStock === true;
   const { pendingCount } = useOffline();
   const pharmacyId = selectedPharmacy?.id;
   const observerRef = useRef(null);
@@ -42,7 +44,9 @@ export default function BatchesPage() {
     if (append) setIsLoadingMore(true);
     else setIsLoading(true);
     try {
-      const res = await stockApi.fetchInventory(pharmacyId, pageNum);
+      const res = lowStock
+        ? await stockApi.fetchLowStock(pharmacyId)
+        : await stockApi.fetchInventory(pharmacyId, pageNum);
       const items = res?.data ?? [];
       if (append) {
         setInventory(prev => [...prev, ...items]);
@@ -51,7 +55,7 @@ export default function BatchesPage() {
         cacheInventory(items, pharmacyId).catch((err) => console.error('[cache] inventory', err));
       }
       const meta = res?.meta;
-      setHasMore(meta ? meta.current_page < meta.last_page : items.length === 50);
+      setHasMore(lowStock ? false : (meta ? meta.current_page < meta.last_page : items.length === 50));
     } catch {
       if (!append) {
         const cached = await getCachedInventory(pharmacyId);
@@ -66,7 +70,7 @@ export default function BatchesPage() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [pharmacyId]);
+  }, [pharmacyId, lowStock]);
 
   const fetchBatches = useCallback(async (itemId) => {
     if (!pharmacyId || !itemId) return;
@@ -260,6 +264,12 @@ export default function BatchesPage() {
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/30 text-primary text-[11px] tracking-[0.05em] uppercase font-bold mb-4">
             <span className="material-symbols-outlined text-sm">science</span>
             {selectedPharmacy?.name || t("batches.title")}
+            {lowStock && (
+              <span className="ml-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold">
+                <span className="material-symbols-outlined text-xs">warning</span>
+                {t("stock.lowStock")}
+              </span>
+            )}
           </span>
           <h1 className="text-[3.25rem] leading-[1.1] tracking-[-0.02em] text-on-surface font-light mb-3">{t("batches.title")}</h1>
           <p className="text-base text-on-surface-variant max-w-xl leading-relaxed">{t("batches.description")}</p>
