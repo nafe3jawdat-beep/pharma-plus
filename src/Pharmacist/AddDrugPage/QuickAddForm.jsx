@@ -36,7 +36,7 @@ export default function QuickAddForm({ selectedPharmacy, onSubmit, onCancel }) {
         arabic_form: form.arabicForm.trim(),
       });
       setForm(emptyQuickAddForm);
-      navigate("/Dashboard/StockManagement");
+      navigate("/Dashboard/Proposals");
     } catch (err) {
       toast.error(err.response?.data?.message || t("drugs.quickAddFailed"));
     } finally { setSubmitting(false); }
