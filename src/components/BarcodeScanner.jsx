@@ -34,7 +34,6 @@ export default function BarcodeScanner({ open, onScan, onClose }) {
   const streamRef = useRef(null);
   const animFrameRef = useRef(null);
   
-  // 💡 إضافة الـ Canvas المخفي لمعالجة الصور
   const hiddenCanvasRef = useRef(document.createElement('canvas'));
   
   const isScanningActiveRef = useRef(false);
@@ -84,14 +83,12 @@ export default function BarcodeScanner({ open, onScan, onClose }) {
     }
   }, [torchOn]);
 
-  // 🚀 دالة المعالجة الجذرية باستخدام الـ Canvas المخفي
   const processFrame = useCallback(async () => {
     if (!isScanningActiveRef.current || !videoRef.current) return;
 
     const video = videoRef.current;
     const now = performance.now();
 
-    // فحص إطار كل 150 مللي ثانية (6 إطارات بالثانية كافية جداً)
     if (
       video.readyState === video.HAVE_ENOUGH_DATA &&
       !isProcessingRef.current &&
@@ -102,16 +99,13 @@ export default function BarcodeScanner({ open, onScan, onClose }) {
       lastScanTimeRef.current = now;
 
       try {
-        // 1. حساب منطقة الاقتطاع (المنطقة الوسطى التي يركز عليها المستخدم)
         const vW = video.videoWidth;
         const vH = video.videoHeight;
         
-        // نأخذ 60% من مساحة الفيديو في المنتصف
         const scanAreaSize = Math.min(vW, vH) * 0.6;
         const startX = (vW - scanAreaSize) / 2;
         const startY = (vH - scanAreaSize) / 2;
 
-        // 2. إعداد الـ Canvas لمعالجة سريعة (بحجم 300x300 فقط!)
         const canvas = hiddenCanvasRef.current;
         canvas.width = 200;
         canvas.height = 200;
@@ -127,12 +121,10 @@ export default function BarcodeScanner({ open, onScan, onClose }) {
         const imageData = ctx.getImageData(0, 0, 200, 200);
         let detectedCode = null;
 
-        // المحرك المباشر (سريع جداً)
         if (nativeDetectorRef.current) {
           const barcodes = await nativeDetectorRef.current.detect(imageData);
           if (barcodes.length > 0) detectedCode = barcodes[0].rawValue;
         } 
-        // المحرك الاحتياطي
         else {
           const results = await readBarcodes(imageData, {
             formats: FAST_WASM_FORMATS,
@@ -177,11 +169,10 @@ export default function BarcodeScanner({ open, onScan, onClose }) {
       }
 
       try {
-        // تم تخفيف القيود تماماً لحل مشكلة الشاشة الخضراء DroidCam
         const constraints = {
           video: deviceId
             ? { deviceId: { exact: deviceId } }
-            : { facingMode: 'environment' } // أزلنا الـ ideal dimensions تماماً ليختار المتصفح الأنسب
+            : { facingMode: 'environment' } 
         };
 
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -209,8 +200,7 @@ export default function BarcodeScanner({ open, onScan, onClose }) {
     [processFrame, stopScanner, t]
   );
 
-  // ... (باقي كود الـ useEffect و الـ UI يبقى كما هو تماماً بدون تغيير)
-  // سأرفق لك جزء الـ useEffect والـ Return لتكون النسخة مكتملة للنسخ واللصق
+  
 
   useEffect(() => {
     if (!open) {

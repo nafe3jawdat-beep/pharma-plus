@@ -895,7 +895,7 @@
     "quickAddFormHint": "أدخل تفاصيل الدواء لإضافته إلى مخزونك الخاص.",
     "barcode": "الباركود",
     "arabicForm": "الشكل بالعربية",
-    "quickAddSuccess": "تمت إضافة الدواء إلى مخزونك!",
+    "quickAddSuccess": "تم إضافة الدواء راجع صفحة مقترحاتي",
     "quickAddFailed": "فشلت إضافة الدواء.",
     "medicationNameRequired": "اسم الدواء مطلوب.",
     "barcodeRequired": "الباركود مطلوب."

@@ -904,7 +904,7 @@
     "quickAddFormHint": "Enter the medication details to add it to your private inventory.",
     "barcode": "Barcode",
     "arabicForm": "Arabic Form",
-    "quickAddSuccess": "Medication added to your inventory!",
+    "quickAddSuccess": "Medication added; please check the Proposals page.",
     "quickAddFailed": "Failed to add medication.",
     "medicationNameRequired": "Medication name is required.",
     "barcodeRequired": "Barcode is required."
