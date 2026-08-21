@@ -42,11 +42,15 @@ export default function TwoFactorVerify() {
     }
   };
 
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !digits[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
+const handleKeyDown = (index, e) => {
+  if (e.key === "Backspace" && !digits[index] && index > 0) {
+    inputRefs.current[index - 1]?.focus();
+  } else if (e.key === "ArrowLeft" && index > 0) {
+    inputRefs.current[index - 1]?.focus();
+  } else if (e.key === "ArrowRight" && index < 5) {
+    inputRefs.current[index + 1]?.focus();
+  }
+};
 
   const handlePaste = (e) => {
     e.preventDefault();
