@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import { notificationApi } from "../services/pharmacist";
 import { useNotificationCount } from "../contexts/NotificationContext";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
@@ -82,6 +83,33 @@ function getDateGroup(dateStr) {
 
 const groupOrder = ["Today", "Yesterday", "ThisWeek", "Earlier"];
 
+const ACTION_TOAST_KEY = {
+  accept: "notifications.inviteAccepted",
+  reject: "notifications.inviteRejected",
+  acceptJoin: "notifications.joinAccepted",
+  rejectJoin: "notifications.joinRejected",
+};
+
+function serverResolution(n) {
+  const raw = n?.data?.status ?? n?.data?.invitation_status ?? n?.data?.request_status;
+  const v = typeof raw === "string" ? raw.toLowerCase() : "";
+  if (v === "accepted" || v === "approved") return "accepted";
+  if (v === "rejected" || v === "declined") return "rejected";
+  return null;
+}
+
+function ResolutionChip({ resolution, t }) {
+  const accepted = resolution === "accepted";
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold ${
+      accepted ? "bg-emerald-50 text-emerald-600" : "bg-surface-container-high text-on-surface-variant"
+    }`}>
+      <span className="material-symbols-outlined text-sm">{accepted ? "check_circle" : "cancel"}</span>
+      {t(accepted ? "notifications.statusAccepted" : "notifications.statusRejected")}
+    </span>
+  );
+}
+
 const TABS = [
   { key: "all", icon: "notifications" },
   { key: "unread", icon: "mark_email_unread" },
@@ -94,6 +122,7 @@ export default function NotificationsPage() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const [processing, setProcessing] = useState(null);
+  const [resolvedActions, setResolvedActions] = useState({});
   const [selectedNotification, setSelectedNotification] = useState(null);
   const { refresh } = useNotificationCount();
   const { t, i18n } = useTranslation();
@@ -129,6 +158,11 @@ export default function NotificationsPage() {
     return groupOrder.filter((g) => map[g]).map((g) => ({ key: g, items: map[g] }));
   }, [filtered]);
 
+  const getResolution = useCallback(
+    (n) => resolvedActions[n?.id] || serverResolution(n),
+    [resolvedActions]
+  );
+
   const handleAction = (action, id) => {
     setProcessing(id);
     const apiMap = {
@@ -138,8 +172,15 @@ export default function NotificationsPage() {
       rejectJoin: notificationApi.rejectJoinRequest,
     };
     apiMap[action](id)
-      .then(() => { fetchNotifications(); refresh(); })
-      .catch(() => {})
+      .then(() => {
+        setResolvedActions((p) => ({ ...p, [id]: action.startsWith("accept") ? "accepted" : "rejected" }));
+        toast.success(t(ACTION_TOAST_KEY[action]));
+        fetchNotifications();
+        refresh();
+      })
+      .catch(() => {
+        toast.error(t("notifications.actionFailed"));
+      })
       .finally(() => setProcessing(null));
   };
 
@@ -304,6 +345,7 @@ export default function NotificationsPage() {
                     const isUnread = !n.read_at;
                     const cfg = typeConfig[n.type] || fallback;
                     const isProcessing = processing === n.id;
+                    const resolution = getResolution(n);
 
                     return (
                       <div
@@ -359,7 +401,13 @@ export default function NotificationsPage() {
                               </div>
                             </div>
 
-                            {(n.type === "pharmacist_invitation" || n.type === "join_request") && isUnread && (
+                            {(n.type === "pharmacist_invitation" || n.type === "join_request") && resolution && (
+                              <div className="mt-4">
+                                <ResolutionChip resolution={resolution} t={t} />
+                              </div>
+                            )}
+
+                            {(n.type === "pharmacist_invitation" || n.type === "join_request") && isUnread && !resolution && (
                               <div className="mt-4 flex items-center gap-2.5">
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleAction(n.type === "pharmacist_invitation" ? "accept" : "acceptJoin", n.id); }}
@@ -454,7 +502,13 @@ export default function NotificationsPage() {
                 )}
               </div>
 
-              {(selectedNotification.type === "pharmacist_invitation" || selectedNotification.type === "join_request") && (
+                {(selectedNotification.type === "pharmacist_invitation" || selectedNotification.type === "join_request") && getResolution(selectedNotification) && (
+                  <div className="px-6 py-4 border-t border-surface-container-high">
+                    <ResolutionChip resolution={getResolution(selectedNotification)} t={t} />
+                  </div>
+                )}
+
+                {(selectedNotification.type === "pharmacist_invitation" || selectedNotification.type === "join_request") && !getResolution(selectedNotification) && (
                 <div className="px-6 py-4 border-t border-surface-container-high flex items-center gap-3">
                   <button
                     onClick={() => {

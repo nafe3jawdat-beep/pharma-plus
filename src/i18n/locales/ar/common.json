@@ -808,6 +808,13 @@
     "emptyReadDescription": "ستظهر الإشعارات المقروءة هنا.",
     "detailsTitle": "تفاصيل الإشعار",
     "noAdditionalDetails": "لا توجد تفاصيل إضافية متاحة.",
+    "statusAccepted": "مقبول",
+    "statusRejected": "مرفوض",
+    "inviteAccepted": "تم قبول الدعوة",
+    "inviteRejected": "تم رفض الدعوة",
+    "joinAccepted": "تم قبول طلب الانضمام",
+    "joinRejected": "تم رفض طلب الانضمام",
+    "actionFailed": "حدث خطأ ما. حاول مرة أخرى.",
     "field": "الحقل",
     "value": "القيمة"
   },

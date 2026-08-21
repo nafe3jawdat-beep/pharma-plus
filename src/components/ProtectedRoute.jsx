@@ -28,6 +28,8 @@ export default function ProtectedRoute({ requiredPermissions, children }) {
 
   if (isOwner) return children;
 
+  if (!requiredPermissions.length) return children;
+
   const hasAccess = requiredPermissions.some((p) => myPermissions[p]);
   if (!hasAccess) return <Navigate to="/Dashboard" replace />;
 

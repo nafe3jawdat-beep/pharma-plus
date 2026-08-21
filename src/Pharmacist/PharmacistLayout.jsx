@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Sidebar from "./Sidebar";
@@ -24,6 +24,7 @@ export default function PharmacistLayout() {
   const [isOwner, setIsOwner] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [orderVersion, setOrderVersion] = useState(0);
+  const dashSettledRef = useRef(false);
 
   const isVerified = verificationStatus === "approved";
 
@@ -75,10 +76,12 @@ export default function PharmacistLayout() {
         if (list.length > 0 && !selectedPharmacy) {
           setSelectedPharmacy(list[0]);
         }
+        dashSettledRef.current = true;
         setLoaded(true);
       })
       .catch(() => {
         toast.error(t("errors.loadDashboard"));
+        dashSettledRef.current = true;
         setLoaded(true);
       });
   };
@@ -92,7 +95,9 @@ export default function PharmacistLayout() {
     if (!selectedPharmacy?.id) {
       setMyPermissions(null); // eslint-disable-line react-hooks/set-state-in-effect
       setIsOwner(false);
-      setLoaded(true);
+      if (dashSettledRef.current) {
+        setLoaded(true);
+      }
       return;
     }
     employeeService.myPermissions(selectedPharmacy.id)

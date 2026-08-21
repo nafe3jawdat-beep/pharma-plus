@@ -817,6 +817,13 @@
     "emptyReadDescription": "Read notifications will appear here.",
     "detailsTitle": "Notification Details",
     "noAdditionalDetails": "No additional details available.",
+    "statusAccepted": "Accepted",
+    "statusRejected": "Rejected",
+    "inviteAccepted": "Invitation accepted",
+    "inviteRejected": "Invitation rejected",
+    "joinAccepted": "Join request accepted",
+    "joinRejected": "Join request rejected",
+    "actionFailed": "Something went wrong. Please try again.",
     "field": "Field",
     "value": "Value"
   },
